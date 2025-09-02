@@ -4,6 +4,7 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import { HomePage } from "./pages/home.page";
 import { Banner } from "./components/client/banner/banner";
+import { LoginPage } from "./pages/Login.page";
 
 const LayoutClient = () => {
   return (
@@ -37,7 +38,7 @@ function App() {
     // { path: "/thanks", element: <ThanksPage /> },
 
     // // Auth Pages
-    // { path: "/login", element: <LoginPage /> },
+    { path: "/login", element: <LoginPage /> },
     // { path: "/register", element: <RegisterPage /> },
     // { path: "/confirm", element: <ConfirmPage /> },
     // { path: "/unauthorized", element: <Unauthorized /> },
