@@ -15,7 +15,6 @@ export const HomePage = () => {
     const fetchData = async () => {
       try {
         const result = await getProductsByCategory(activeIndex + 1);
-        console.log(result);
         setProducts(result.data); // tùy API trả về
       } catch (error) {
         console.error("Error fetching products:", error);

@@ -6,9 +6,11 @@ import {
 } from "@ant-design/icons";
 import logo from "../../assets/logo.svg";
 import { Popover } from "antd";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../context/auth.context";
 
 const Navbar = () => {
+  const { user, cart } = useContext(AuthContext);
   const content = (
     <div>
       <h2>Tiếng Việt</h2>
@@ -65,7 +67,7 @@ const Navbar = () => {
                   fontSize: "1rem",
                 }}
               >
-                0
+                {cart.items.length}
               </span>
               <ShoppingCartOutlined className="ml-2" />
             </div>
@@ -94,45 +96,72 @@ const Navbar = () => {
                   style={{
                     transition: "1s",
                   }}
-                  className="w-[210px] DropDownMenu absolute top-full right-0 bg-white   shadow-xl    z-10 duration-200"
+                  className="w-[210px] DropDownMenu absolute top-full right-0 bg-white shadow-xl z-10 duration-200 rounded-xl"
                 >
-                  <a
-                    href="/login"
-                    className=" duration-100 block py-3 pl-5 md:py-2 md:pl-4  md:block hover:font-bold hover:text-red-700 cursor-pointer m-0"
-                  >
-                    Đăng nhập
-                  </a>
+                  {!user?.id ? (
+                    <>
+                      <a
+                        href="/login"
+                        className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 md:block hover:font-bold hover:text-red-700 cursor-pointer m-0"
+                      >
+                        Đăng nhập
+                      </a>
+                      <a
+                        href="/register"
+                        className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer m-0"
+                      >
+                        Đăng ký
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-4 border-b border-gray-200">
+                        <p className="font-bold">{user.full_name}</p>
+                        <p className="text-sm text-gray-600">{user.email}</p>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="bg-gray-300 w-full h-[1px]" />
+
                   <a
                     href="#"
-                    className=" duration-100 block py-3 pl-5 md:py-2 md:pl-4  hover:font-bold hover:text-red-700 cursor-pointer m-0"
-                  >
-                    Đăng ký
-                  </a>
-                  <div className="bg-gray-300  w-[100%] h-[1px]" />
-                  <a
-                    href="#"
-                    className="duration-100 block py-3 pl-5 md:py-2 md:pl-4  hover:font-bold hover:text-red-700 cursor-pointer "
+                    className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"
                   >
                     Theo dõi đơn hàng
                   </a>
                   <a
                     href="#"
-                    className=" duration-100 block py-3 pl-5 md:py-2 md:pl-4  hover:font-bold hover:text-red-700 cursor-pointer "
+                    className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"
                   >
                     Đỗi điểm
                   </a>
                   <a
                     href="#"
-                    className="duration-100 block py-3 pl-5 md:py-2 md:pl-4  hover:font-bold hover:text-red-700 cursor-pointer "
+                    className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"
                   >
                     Hut Rewards
                   </a>
                   <a
                     href="#"
-                    className="duration-100 block py-3 pl-5 md:py-2 md:pl-4  hover:font-bold hover:text-red-700 cursor-pointer "
+                    className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"
                   >
                     Hỗ trợ khách hàng
                   </a>
+
+                  {user?.id && (
+                    <>
+                      <div className="bg-gray-300 w-full h-[1px]" />
+                      <button
+                        onClick={() => {
+                          // TODO: xử lý logout ở đây
+                        }}
+                        className="w-full text-left duration-100 py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"
+                      >
+                        Đăng xuất
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

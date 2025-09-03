@@ -47,10 +47,33 @@ const loginApi = (email, password) => {
     return axios.post(URL_BACKEND, data)
 }
 
+const getAccountAPI = () => {
+    const URL_BACKEND = "/api/auth/me";
+    return axios.get(URL_BACKEND);
+}
+
+
+const getCart = () => {
+    const URL_BACKEND = "/api/cart";
+    return axios.get(URL_BACKEND)
+}
+
+const apiAddCart = (id,quantity) =>{
+     const URL_BACKEND = "/api/cart/items";
+    const data = {
+        product_variant_id: id,
+        quantity: quantity,
+
+    }
+    return axios.post(URL_BACKEND, data)
+}
 export {
     getAllProducts,
     getAllCategories,
     getProductsByCategory,
     createUserApi,
-    loginApi
+    loginApi,
+    getAccountAPI,
+    getCart,
+    apiAddCart
 };

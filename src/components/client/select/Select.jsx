@@ -31,10 +31,8 @@ const Select = (props) => {
   const scrollRight = () => {
     scrollRef.current.scrollBy({ left: 150, behavior: "smooth" });
   };
-  console.log(categories);
   // Lấy banner của category đang active
   const activeBanner = categories[activeIndex]?.url; // giả sử categories[i].banner = URL ảnh
-  console.log(activeBanner);
   return (
     <>
       <div className="relative flex items-center">

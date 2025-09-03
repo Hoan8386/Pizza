@@ -4,10 +4,13 @@ import {
   PlusOutlined,
   CloseOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import pizza from "../../../assets/pizza/pizza.webp";
+import { apiAddCart, getCart } from "../../../services/api.service";
+import { AuthContext } from "../../context/auth.context";
 
 export const ModelProduct = ({ product, onClose }) => {
+  const { setCart } = useContext(AuthContext);
   // Lấy danh sách kích thước duy nhất từ product_variants
   const sizes = [
     ...new Map(
@@ -25,6 +28,29 @@ export const ModelProduct = ({ product, onClose }) => {
 
   const [selectedCrust, setSelectedCrust] = useState(crusts[0]);
 
+  const variant = product.product_variants.find(
+    (v) =>
+      v.size.id === selectedSize.id && v.crust.id === selectedCrust.crust.id
+  );
+
+  console.log("Variant tìm được:", variant);
+  const fetchCart = async () => {
+    const res = await getCart();
+    if (res.data) {
+      setCart({
+        id: res.data.cart.id,
+        user_id: res.data.cart.user_id,
+        totalItems: res.data.items.length,
+        totalPrice: res.data.total,
+        items: res.data.items,
+      });
+    }
+  };
+  const addItem = async () => {
+    const res = await apiAddCart(variant.id, quantity);
+    console.log("thêm sản phẩm thành công ", res);
+    fetchCart();
+  };
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl w-[62%]  h-[640px] overflow-y-auto relative ">
@@ -152,7 +178,10 @@ export const ModelProduct = ({ product, onClose }) => {
                 </button>
               </div>
 
-              <button className="flex-1 bg-red-700 text-white py-3   rounded-lg flex items-center justify-center gap-2 font-semibold">
+              <button
+                className="flex-1 bg-red-700 text-white py-3   rounded-lg flex items-center justify-center gap-2 font-semibold"
+                onClick={addItem}
+              >
                 Thêm vào giỏ hàng •{" "}
                 {(Number(selectedCrust.price) * quantity).toLocaleString()} đ
               </button>

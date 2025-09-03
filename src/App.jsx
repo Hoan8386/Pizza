@@ -6,16 +6,36 @@ import { HomePage } from "./pages/home.page";
 import { Banner } from "./components/client/banner/banner";
 import { LoginPage } from "./pages/Login.page";
 import { RegisterPage } from "./pages/Register.page";
+import { useContext } from "react";
+import { AuthContext } from "./components/context/auth.context";
+import LayoutApp from "./components/share/Layout.app";
+import { Spin } from "antd";
 
 const LayoutClient = () => {
+  const { isAppLoading } = useContext(AuthContext);
   return (
     <>
-      <div className="w-[1170px]  mx-auto">
-        <Header />
-        <Banner />
-        <Outlet />
-        <Footer />
-      </div>
+      {isAppLoading === true ? (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50% , -50%)",
+          }}
+        >
+          <Spin />
+        </div>
+      ) : (
+        <>
+          <div className="w-[1170px]  mx-auto">
+            <Header />
+            <Banner />
+            <Outlet />
+            <Footer />
+          </div>
+        </>
+      )}
     </>
   );
 };
@@ -24,7 +44,11 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <LayoutClient />,
+      element: (
+        <LayoutApp>
+          <LayoutClient />
+        </LayoutApp>
+      ),
       //errorElement: <ErrorPage />,
       children: [
         // { index: true, element: <HomePage /> },

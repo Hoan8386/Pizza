@@ -1,25 +1,29 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import logo from "../assets/logo.svg";
 import logo2 from "../assets/PizzaHut.jpg";
 import { loginApi } from "../services/api.service";
+import { AuthContext } from "../components/context/auth.context";
+import { useNavigate } from "react-router-dom";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const handleClearEmail = () => setEmail("");
+
+  const navigate = useNavigate();
   const toggleShowPassword = () => setShowPassword((prev) => !prev);
 
+  const { setUser } = useContext(AuthContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Email:", email, "Password:", password);
     const res = await loginApi(email, password);
     if (res?.data) {
-      const { access_token, user } = res.data;
-
-      localStorage.setItem("access_token", access_token);
-      console.log("check", user);
+      const { token, user } = res.data;
+      localStorage.setItem("access_token", token);
+      setUser(user);
+      navigate("/");
     }
   };
 

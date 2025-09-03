@@ -4,7 +4,6 @@ import { ModelProduct } from "../model/ModelProduct";
 
 export const ProductListItem = ({ products }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
-
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
