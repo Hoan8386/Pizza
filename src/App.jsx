@@ -5,6 +5,7 @@ import Footer from "./components/layout/Footer";
 import { HomePage } from "./pages/home.page";
 import { Banner } from "./components/client/banner/banner";
 import { LoginPage } from "./pages/Login.page";
+import { RegisterPage } from "./pages/Register.page";
 
 const LayoutClient = () => {
   return (
@@ -39,7 +40,7 @@ function App() {
 
     // // Auth Pages
     { path: "/login", element: <LoginPage /> },
-    // { path: "/register", element: <RegisterPage /> },
+    { path: "/register", element: <RegisterPage /> },
     // { path: "/confirm", element: <ConfirmPage /> },
     // { path: "/unauthorized", element: <Unauthorized /> },
   ]);

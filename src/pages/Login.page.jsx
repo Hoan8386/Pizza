@@ -1,50 +1,211 @@
 import { useState } from "react";
+import logo from "../assets/logo.svg";
+import logo2 from "../assets/PizzaHut.jpg";
+import { loginApi } from "../services/api.service";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleClearEmail = () => setEmail("");
+  const toggleShowPassword = () => setShowPassword((prev) => !prev);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Email:", email);
-    console.log("Password:", password);
-    // Gọi API login ở đây
+    console.log("Email:", email, "Password:", password);
+    const res = await loginApi(email, password);
+    if (res?.data) {
+      const { access_token, user } = res.data;
+
+      localStorage.setItem("access_token", access_token);
+      console.log("check", user);
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-96"
-      >
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
-        <div className="mb-4">
-          <label className="block mb-1 font-semibold">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block mb-1 font-semibold">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+    <>
+      {/* Logo */}
+      <div className="flex justify-center p-4">
+        <img src={logo} alt="Logo" />
+      </div>
+
+      {/* Header đỏ */}
+      <div className="flex justify-center mx-auto">
+        <div
+          className="w-[521px] pt-2 pb-14 rounded-2xl flex flex-col items-center"
+          style={{ backgroundColor: "rgb(200 16 46)" }}
         >
-          Login
-        </button>
-      </form>
-    </div>
+          <img src={logo2} alt="Pizza Hut" className="w-[90px] h-[90px]" />
+          <p className="text-center text-sm text-white mt-6">
+            Đăng nhập để mở khóa
+          </p>
+          <p className="text-center text-lg text-white font-semibold">
+            Lợi ích tuyệt vời
+          </p>
+
+          <div className="flex flex-row justify-between w-full px-4 mt-6">
+            {/* Item 1 */}
+            <div className="flex flex-row items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                fill="currentColor"
+                className="text-white"
+              >
+                <g opacity="0.8">
+                  <path d="M25.454 11.935a4 4 0 0 1-.464-.875 4 4 0 0 1 0-1.041 3.75 3.75 0 0 0-.385-2.144 3.75 3.75 0 0 0-1.689-1.374 4 4 0 0 1-.875-.542 4 4 0 0 1-.542-.875 3.8 3.8 0 0 0-1.374-1.698 3.82 3.82 0 0 0-2.135-.332 4 4 0 0 1-1.041-.044 4 4 0 0 1-.875-.464A3.82 3.82 0 0 0 14 1.75a3.82 3.82 0 0 0-2.065.796q-.408.288-.875.464a4 4 0 0 1-1.041.044 3.82 3.82 0 0 0-2.144.332 3.8 3.8 0 0 0-1.374 1.698 4 4 0 0 1-.542.875q-.402.329-.875.542a3.75 3.75 0 0 0-1.689 1.374 3.75 3.75 0 0 0-.341 2.135c.032.348.017.698-.044 1.041a4 4 0 0 1-.464.875A3.82 3.82 0 0 0 1.75 14c.056.752.333 1.47.796 2.065q.288.408.464.875c.061.344.076.694.044 1.041-.1.733.019 1.479.341 2.144a3.74 3.74 0 0 0 1.689 1.374q.473.213.875.542.329.401.542.875c.283.688.76 1.278 1.374 1.698.665.313 1.406.429 2.135.332a4 4 0 0 1 1.041 0q.467.177.875.464c.592.48 1.315.773 2.074.84a3.83 3.83 0 0 0 2.065-.796 4 4 0 0 1 .875-.464 4 4 0 0 1 1.041 0 3.8 3.8 0 0 0 2.144-.376 3.8 3.8 0 0 0 1.374-1.698q.213-.473.542-.875.401-.328.875-.542a3.75 3.75 0 0 0 1.689-1.374c.32-.663.44-1.405.341-2.135a4 4 0 0 1 0-1.041q.177-.467.464-.875c.48-.592.773-1.315.84-2.074a3.83 3.83 0 0 0-.796-2.065m-1.47 3.194a4.7 4.7 0 0 0-.683 1.365 5.4 5.4 0 0 0-.105 1.566c.064.4.027.808-.105 1.19-.27.307-.609.547-.989.7a5 5 0 0 0-1.294.875 5 5 0 0 0-.875 1.295c-.154.38-.393.718-.7.989a2.46 2.46 0 0 1-1.19.105 5.4 5.4 0 0 0-1.567.105 4.8 4.8 0 0 0-1.373.682c-.324.25-.702.42-1.103.499a2.6 2.6 0 0 1-1.12-.516c-.418-.3-.882-.53-1.374-.683a3.7 3.7 0 0 0-1.006-.113h-.543c-.404.069-.819.036-1.207-.097a2.6 2.6 0 0 1-.7-.989 5 5 0 0 0-.875-1.294 5 5 0 0 0-1.295-.875 2.6 2.6 0 0 1-.971-.683 2.46 2.46 0 0 1-.105-1.19 5.4 5.4 0 0 0-.105-1.566c-.151-.49-.382-.951-.683-1.365A2.7 2.7 0 0 1 3.5 14c.081-.412.258-.798.516-1.129.301-.414.532-.875.683-1.365a5.4 5.4 0 0 0 .105-1.566c-.064-.4-.028-.808.105-1.19.27-.307.609-.547.989-.7a5 5 0 0 0 1.295-.875 5 5 0 0 0 .875-1.295c.15-.372.383-.704.682-.971.382-.133.79-.169 1.19-.105a5.4 5.4 0 0 0 1.566-.105 4.8 4.8 0 0 0 1.374-.683A2.6 2.6 0 0 1 14 3.5c.409.08.793.258 1.12.516.418.3.882.53 1.374.683a5.3 5.3 0 0 0 1.566.105c.4-.064.808-.028 1.19.105.307.27.547.609.7.989.222.475.517.912.875 1.295.383.358.82.653 1.295.875.38.153.718.392.989.7.132.381.168.79.105 1.19a5.4 5.4 0 0 0 .105 1.566c.15.49.381.95.682 1.365.25.327.42.707.499 1.111a2.7 2.7 0 0 1-.516 1.129"></path>
+                  <path d="M14 6.125a7.875 7.875 0 1 0 0 15.75 7.875 7.875 0 0 0 0-15.75m0 14a6.125 6.125 0 1 1 0-12.25 6.125 6.125 0 0 1 0 12.25"></path>
+                  <path d="m16.004 10.754-5.25 5.25a.875.875 0 0 0 0 1.242.874.874 0 0 0 1.242 0l5.25-5.25a.877.877 0 0 0-.957-1.433.9.9 0 0 0-.285.19M11.375 12.25a.875.875 0 1 0 0-1.75.875.875 0 0 0 0 1.75M16.625 17.5a.875.875 0 1 0 0-1.75.875.875 0 0 0 0 1.75"></path>
+                </g>
+              </svg>
+              <div className="text-white flex flex-col ml-2">
+                <p className="font-light text-xs leading-4">Tận hưởng</p>
+                <span className="font-medium text-xs leading-4">
+                  Vô vàn ưu đãi
+                </span>
+              </div>
+            </div>
+
+            {/* Các item 2 và 3 tương tự, thay SVG và text */}
+
+            <div className="flex flex-row items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                fill="currentColor"
+                className="text-white"
+              >
+                <g opacity="0.8">
+                  <path d="M25.454 11.935a4 4 0 0 1-.464-.875 4 4 0 0 1 0-1.041 3.75 3.75 0 0 0-.385-2.144 3.75 3.75 0 0 0-1.689-1.374 4 4 0 0 1-.875-.542 4 4 0 0 1-.542-.875 3.8 3.8 0 0 0-1.374-1.698 3.82 3.82 0 0 0-2.135-.332 4 4 0 0 1-1.041-.044 4 4 0 0 1-.875-.464A3.82 3.82 0 0 0 14 1.75a3.82 3.82 0 0 0-2.065.796q-.408.288-.875.464a4 4 0 0 1-1.041.044 3.82 3.82 0 0 0-2.144.332 3.8 3.8 0 0 0-1.374 1.698 4 4 0 0 1-.542.875q-.402.329-.875.542a3.75 3.75 0 0 0-1.689 1.374 3.75 3.75 0 0 0-.341 2.135c.032.348.017.698-.044 1.041a4 4 0 0 1-.464.875A3.82 3.82 0 0 0 1.75 14c.056.752.333 1.47.796 2.065q.288.408.464.875c.061.344.076.694.044 1.041-.1.733.019 1.479.341 2.144a3.74 3.74 0 0 0 1.689 1.374q.473.213.875.542.329.401.542.875c.283.688.76 1.278 1.374 1.698.665.313 1.406.429 2.135.332a4 4 0 0 1 1.041 0q.467.177.875.464c.592.48 1.315.773 2.074.84a3.83 3.83 0 0 0 2.065-.796 4 4 0 0 1 .875-.464 4 4 0 0 1 1.041 0 3.8 3.8 0 0 0 2.144-.376 3.8 3.8 0 0 0 1.374-1.698q.213-.473.542-.875.401-.328.875-.542a3.75 3.75 0 0 0 1.689-1.374c.32-.663.44-1.405.341-2.135a4 4 0 0 1 0-1.041q.177-.467.464-.875c.48-.592.773-1.315.84-2.074a3.83 3.83 0 0 0-.796-2.065m-1.47 3.194a4.7 4.7 0 0 0-.683 1.365 5.4 5.4 0 0 0-.105 1.566c.064.4.027.808-.105 1.19-.27.307-.609.547-.989.7a5 5 0 0 0-1.294.875 5 5 0 0 0-.875 1.295c-.154.38-.393.718-.7.989a2.46 2.46 0 0 1-1.19.105 5.4 5.4 0 0 0-1.567.105 4.8 4.8 0 0 0-1.373.682c-.324.25-.702.42-1.103.499a2.6 2.6 0 0 1-1.12-.516c-.418-.3-.882-.53-1.374-.683a3.7 3.7 0 0 0-1.006-.113h-.543c-.404.069-.819.036-1.207-.097a2.6 2.6 0 0 1-.7-.989 5 5 0 0 0-.875-1.294 5 5 0 0 0-1.295-.875 2.6 2.6 0 0 1-.971-.683 2.46 2.46 0 0 1-.105-1.19 5.4 5.4 0 0 0-.105-1.566c-.151-.49-.382-.951-.683-1.365A2.7 2.7 0 0 1 3.5 14c.081-.412.258-.798.516-1.129.301-.414.532-.875.683-1.365a5.4 5.4 0 0 0 .105-1.566c-.064-.4-.028-.808.105-1.19.27-.307.609-.547.989-.7a5 5 0 0 0 1.295-.875 5 5 0 0 0 .875-1.295c.15-.372.383-.704.682-.971.382-.133.79-.169 1.19-.105a5.4 5.4 0 0 0 1.566-.105 4.8 4.8 0 0 0 1.374-.683A2.6 2.6 0 0 1 14 3.5c.409.08.793.258 1.12.516.418.3.882.53 1.374.683a5.3 5.3 0 0 0 1.566.105c.4-.064.808-.028 1.19.105.307.27.547.609.7.989.222.475.517.912.875 1.295.383.358.82.653 1.295.875.38.153.718.392.989.7.132.381.168.79.105 1.19a5.4 5.4 0 0 0 .105 1.566c.15.49.381.95.682 1.365.25.327.42.707.499 1.111a2.7 2.7 0 0 1-.516 1.129"></path>
+                  <path d="M14 6.125a7.875 7.875 0 1 0 0 15.75 7.875 7.875 0 0 0 0-15.75m0 14a6.125 6.125 0 1 1 0-12.25 6.125 6.125 0 0 1 0 12.25"></path>
+                  <path d="m16.004 10.754-5.25 5.25a.875.875 0 0 0 0 1.242.874.874 0 0 0 1.242 0l5.25-5.25a.877.877 0 0 0-.957-1.433.9.9 0 0 0-.285.19M11.375 12.25a.875.875 0 1 0 0-1.75.875.875 0 0 0 0 1.75M16.625 17.5a.875.875 0 1 0 0-1.75.875.875 0 0 0 0 1.75"></path>
+                </g>
+              </svg>
+              <div className="text-white flex flex-col ml-2">
+                <p className="font-light text-xs leading-4">Tích luỹ</p>
+                <span className="font-medium text-xs leading-4">
+                  Hut rewards
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-row items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                fill="currentColor"
+                className="text-white"
+              >
+                <g opacity="0.8">
+                  <path d="M25.454 11.935a4 4 0 0 1-.464-.875 4 4 0 0 1 0-1.041 3.75 3.75 0 0 0-.385-2.144 3.75 3.75 0 0 0-1.689-1.374 4 4 0 0 1-.875-.542 4 4 0 0 1-.542-.875 3.8 3.8 0 0 0-1.374-1.698 3.82 3.82 0 0 0-2.135-.332 4 4 0 0 1-1.041-.044 4 4 0 0 1-.875-.464A3.82 3.82 0 0 0 14 1.75a3.82 3.82 0 0 0-2.065.796q-.408.288-.875.464a4 4 0 0 1-1.041.044 3.82 3.82 0 0 0-2.144.332 3.8 3.8 0 0 0-1.374 1.698 4 4 0 0 1-.542.875q-.402.329-.875.542a3.75 3.75 0 0 0-1.689 1.374 3.75 3.75 0 0 0-.341 2.135c.032.348.017.698-.044 1.041a4 4 0 0 1-.464.875A3.82 3.82 0 0 0 1.75 14c.056.752.333 1.47.796 2.065q.288.408.464.875c.061.344.076.694.044 1.041-.1.733.019 1.479.341 2.144a3.74 3.74 0 0 0 1.689 1.374q.473.213.875.542.329.401.542.875c.283.688.76 1.278 1.374 1.698.665.313 1.406.429 2.135.332a4 4 0 0 1 1.041 0q.467.177.875.464c.592.48 1.315.773 2.074.84a3.83 3.83 0 0 0 2.065-.796 4 4 0 0 1 .875-.464 4 4 0 0 1 1.041 0 3.8 3.8 0 0 0 2.144-.376 3.8 3.8 0 0 0 1.374-1.698q.213-.473.542-.875.401-.328.875-.542a3.75 3.75 0 0 0 1.689-1.374c.32-.663.44-1.405.341-2.135a4 4 0 0 1 0-1.041q.177-.467.464-.875c.48-.592.773-1.315.84-2.074a3.83 3.83 0 0 0-.796-2.065m-1.47 3.194a4.7 4.7 0 0 0-.683 1.365 5.4 5.4 0 0 0-.105 1.566c.064.4.027.808-.105 1.19-.27.307-.609.547-.989.7a5 5 0 0 0-1.294.875 5 5 0 0 0-.875 1.295c-.154.38-.393.718-.7.989a2.46 2.46 0 0 1-1.19.105 5.4 5.4 0 0 0-1.567.105 4.8 4.8 0 0 0-1.373.682c-.324.25-.702.42-1.103.499a2.6 2.6 0 0 1-1.12-.516c-.418-.3-.882-.53-1.374-.683a3.7 3.7 0 0 0-1.006-.113h-.543c-.404.069-.819.036-1.207-.097a2.6 2.6 0 0 1-.7-.989 5 5 0 0 0-.875-1.294 5 5 0 0 0-1.295-.875 2.6 2.6 0 0 1-.971-.683 2.46 2.46 0 0 1-.105-1.19 5.4 5.4 0 0 0-.105-1.566c-.151-.49-.382-.951-.683-1.365A2.7 2.7 0 0 1 3.5 14c.081-.412.258-.798.516-1.129.301-.414.532-.875.683-1.365a5.4 5.4 0 0 0 .105-1.566c-.064-.4-.028-.808.105-1.19.27-.307.609-.547.989-.7a5 5 0 0 0 1.295-.875 5 5 0 0 0 .875-1.295c.15-.372.383-.704.682-.971.382-.133.79-.169 1.19-.105a5.4 5.4 0 0 0 1.566-.105 4.8 4.8 0 0 0 1.374-.683A2.6 2.6 0 0 1 14 3.5c.409.08.793.258 1.12.516.418.3.882.53 1.374.683a5.3 5.3 0 0 0 1.566.105c.4-.064.808-.028 1.19.105.307.27.547.609.7.989.222.475.517.912.875 1.295.383.358.82.653 1.295.875.38.153.718.392.989.7.132.381.168.79.105 1.19a5.4 5.4 0 0 0 .105 1.566c.15.49.381.95.682 1.365.25.327.42.707.499 1.111a2.7 2.7 0 0 1-.516 1.129"></path>
+                  <path d="M14 6.125a7.875 7.875 0 1 0 0 15.75 7.875 7.875 0 0 0 0-15.75m0 14a6.125 6.125 0 1 1 0-12.25 6.125 6.125 0 0 1 0 12.25"></path>
+                  <path d="m16.004 10.754-5.25 5.25a.875.875 0 0 0 0 1.242.874.874 0 0 0 1.242 0l5.25-5.25a.877.877 0 0 0-.957-1.433.9.9 0 0 0-.285.19M11.375 12.25a.875.875 0 1 0 0-1.75.875.875 0 0 0 0 1.75M16.625 17.5a.875.875 0 1 0 0-1.75.875.875 0 0 0 0 1.75"></path>
+                </g>
+              </svg>
+              <div className="text-white flex flex-col ml-2">
+                <p className="font-light text-xs leading-4">Dễ dàng</p>
+                <span className="font-medium text-xs leading-4">Đặt món</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Form */}
+      <div className="w-full max-w-[512px] mx-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col bg-white shadow-[0_10px_15px_0_rgba(5,13,29,0.18)] px-4 py-6 gap-4 rounded-2xl mt-[-32px] md:mt-6"
+        >
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium mb-2 text-black"
+            >
+              Email
+            </label>
+            <div className="relative">
+              <input
+                id="email"
+                placeholder="Vui lòng nhập email của bạn"
+                className="py-3 pr-10 pl-5 block w-full rounded-md text-base font-normal border border-gray-300 focus:border-secondary focus:border-[1px] focus:ring-0"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {email && (
+                <button
+                  type="button"
+                  onClick={handleClearEmail}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Password */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium mb-2 text-black"
+            >
+              Mật khẩu
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                placeholder="Vui lòng nhập mật khẩu của bạn"
+                className="py-3 pr-10 pl-5 block w-full rounded-md text-base font-normal border border-gray-300 focus:border-secondary focus:border-[1px] focus:ring-0"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={toggleShowPassword}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
+          </div>
+
+          {/* Forgot password */}
+          <div className="text-right">
+            <a
+              className="text-primary underline text-sm leading-5"
+              href="/forgot-password"
+            >
+              Quên mật khẩu
+            </a>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="py-3 px-6 rounded-lg bg-primary text-white text-base font-medium hover:opacity-90"
+          >
+            Đăng Nhập
+          </button>
+
+          {/* Sign up */}
+          <div className="text-center">
+            <p className="text-sm">
+              Bạn chưa có tài khoản?{" "}
+              <a className="text-primary underline" href="/register">
+                Tạo tài khoản
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </>
   );
 };

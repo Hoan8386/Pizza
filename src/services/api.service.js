@@ -18,8 +18,39 @@ const getProductsByCategory = (categoryId) => {
     return axios.get(URL_BACKEND);
 };
 
+
+const createUserApi = (userData) => {
+  const URL_BACKEND = "/api/users";
+
+  // userData phải chứa: username, password, email, full_name, address, phone
+  const data = {
+    username: userData.username,
+    password: userData.password,
+    email: userData.email,
+    full_name: userData.full_name,
+    address: userData.address,
+    phone: userData.phone,
+  };
+
+  return axios.post(URL_BACKEND, data);
+};
+
+
+const loginApi = (email, password) => {
+
+    const URL_BACKEND = "/api/auth/login";
+    const data = {
+        email: email,
+        password: password,
+
+    }
+    return axios.post(URL_BACKEND, data)
+}
+
 export {
     getAllProducts,
     getAllCategories,
-    getProductsByCategory
+    getProductsByCategory,
+    createUserApi,
+    loginApi
 };
