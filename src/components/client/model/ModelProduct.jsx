@@ -8,6 +8,8 @@ import { useContext, useState } from "react";
 import pizza from "../../../assets/pizza/pizza.webp";
 import { apiAddCart, getCart } from "../../../services/api.service";
 import { AuthContext } from "../../context/auth.context";
+import { Button } from "antd";
+import { toast } from "react-toastify";
 
 export const ModelProduct = ({ product, onClose }) => {
   const { setCart } = useContext(AuthContext);
@@ -20,7 +22,7 @@ export const ModelProduct = ({ product, onClose }) => {
 
   const [selectedSize, setSelectedSize] = useState(sizes[0]);
   const [quantity, setQuantity] = useState(1);
-
+  const [isLoading, setIsLoading] = useState(false);
   // Lọc các crust theo size đang chọn
   const crusts = product.product_variants.filter(
     (v) => v.size.id === selectedSize.id
@@ -47,9 +49,12 @@ export const ModelProduct = ({ product, onClose }) => {
     }
   };
   const addItem = async () => {
+    setIsLoading(true);
     const res = await apiAddCart(variant.id, quantity);
     console.log("thêm sản phẩm thành công ", res);
     fetchCart();
+    toast.success("Thêm sản phẩm vào giỏ hàng thành công");
+    setIsLoading(false);
   };
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -178,13 +183,28 @@ export const ModelProduct = ({ product, onClose }) => {
                 </button>
               </div>
 
-              <button
+              {/* <button
                 className="flex-1 bg-red-700 text-white py-3   rounded-lg flex items-center justify-center gap-2 font-semibold"
                 onClick={addItem}
               >
+               
+              </button> */}
+
+              <Button
+                onClick={addItem}
+                style={{
+                  backgroundColor: "rgb(200 16 46)",
+                  color: "white",
+                  border: "none",
+                  fontSize: "16px",
+                  height: "40px",
+                  width: "100%",
+                }}
+                loading={isLoading}
+              >
                 Thêm vào giỏ hàng •{" "}
                 {(Number(selectedCrust.price) * quantity).toLocaleString()} đ
-              </button>
+              </Button>
             </div>
           </div>
         </div>

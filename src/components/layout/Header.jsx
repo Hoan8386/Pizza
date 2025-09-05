@@ -8,9 +8,15 @@ import logo from "../../assets/logo.svg";
 import { Popover } from "antd";
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/auth.context";
+import { logoutApi } from "../../services/api.service";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const { user, cart } = useContext(AuthContext);
+  const { user, setUser, cart, setIsAppLoading, setCart } =
+    useContext(AuthContext);
+  const navigate = useNavigate();
+
   const content = (
     <div>
       <h2>Tiếng Việt</h2>
@@ -20,6 +26,21 @@ const Navbar = () => {
 
   const [showMenu, setShowMenu] = useState(false);
 
+  const logout = async () => {
+    setIsAppLoading(true);
+    const res = await logoutApi();
+    console.log(res);
+    if (res.data.success === true) {
+      toast.success(res.message);
+      setUser([]);
+      setCart([]);
+      localStorage.removeItem("token");
+      navigate("/");
+    } else {
+      toast.error("Đăng xuất thất bại");
+    }
+    setIsAppLoading(false);
+  };
   return (
     <>
       <div className="header flex justify-center">
@@ -67,7 +88,7 @@ const Navbar = () => {
                   fontSize: "1rem",
                 }}
               >
-                {cart.items.length}
+                {cart?.items?.length || 0}
               </span>
               <ShoppingCartOutlined className="ml-2" />
             </div>
@@ -115,10 +136,12 @@ const Navbar = () => {
                     </>
                   ) : (
                     <>
-                      <div className="p-4 border-b border-gray-200">
-                        <p className="font-bold">{user.full_name}</p>
-                        <p className="text-sm text-gray-600">{user.email}</p>
-                      </div>
+                      <Link to="/info">
+                        <div className="p-4 border-b border-gray-200">
+                          <p className="font-bold">{user.full_name}</p>
+                          <p className="text-sm text-gray-600">{user.email}</p>
+                        </div>
+                      </Link>
                     </>
                   )}
 
@@ -153,9 +176,7 @@ const Navbar = () => {
                     <>
                       <div className="bg-gray-300 w-full h-[1px]" />
                       <button
-                        onClick={() => {
-                          // TODO: xử lý logout ở đây
-                        }}
+                        onClick={logout}
                         className="w-full text-left duration-100 py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"
                       >
                         Đăng xuất

@@ -41,6 +41,7 @@ export const HomePage = () => {
   return (
     <>
       <div className="w-[1170px]  mx-auto">
+        <Banner />
         <Select
           categories={categories}
           activeIndex={activeIndex}

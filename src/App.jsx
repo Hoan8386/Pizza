@@ -10,6 +10,7 @@ import { useContext } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import LayoutApp from "./components/share/Layout.app";
 import { Spin } from "antd";
+import { InfoPage } from "./pages/Info.page";
 
 const LayoutClient = () => {
   const { isAppLoading } = useContext(AuthContext);
@@ -30,7 +31,6 @@ const LayoutClient = () => {
         <>
           <div className="w-[1170px]  mx-auto">
             <Header />
-            <Banner />
             <Outlet />
             <Footer />
           </div>
@@ -53,7 +53,7 @@ function App() {
       children: [
         // { index: true, element: <HomePage /> },
         { index: true, element: <HomePage></HomePage> },
-        { path: "/dish", element: <h1>Dish</h1> },
+        { path: "/info", element: <InfoPage /> },
         // { path: "/about", element: <AboutPage /> },
         // { path: "/info", element: <PrivateRoute>  <InfoPage /></PrivateRoute> },
         // { path: "/order", element: <PrivateRoute> <OrderPage /> </PrivateRoute> },

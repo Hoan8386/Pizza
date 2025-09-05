@@ -3,10 +3,14 @@ import axios from "axios";
 import logo from "../assets/logo.svg";
 import logo2 from "../assets/PizzaHut.jpg";
 import { createUserApi } from "../services/api.service";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "antd";
 
 export const RegisterPage = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    username: "",
     password: "",
     confirmPassword: "",
     email: "",
@@ -26,6 +30,8 @@ export const RegisterPage = () => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     axios.get("https://provinces.open-api.vn/api/?depth=1").then((res) => {
@@ -66,55 +72,46 @@ export const RegisterPage = () => {
   };
 
   const validateForm = () => {
-    const { username, password, confirmPassword, email, full_name, phone } =
-      formData;
+    const { password, confirmPassword, email, full_name, phone } = formData;
 
-    if (
-      !username ||
-      !password ||
-      !confirmPassword ||
-      !email ||
-      !full_name ||
-      !phone
-    ) {
-      alert("Vui lòng điền đầy đủ thông tin!");
+    if (!password || !confirmPassword || !email || !full_name || !phone) {
+      toast.error("Vui lòng điền đầy đủ thông tin!");
       return false;
     }
 
     if (!selectedProvince || !selectedDistrict || !selectedWard) {
-      alert("Vui lòng chọn đầy đủ địa chỉ!");
+      toast.error("Vui lòng chọn đầy đủ địa chỉ!");
       return false;
     }
 
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-      alert("Email không hợp lệ!");
+      toast.error("Email không hợp lệ!");
       return false;
     }
 
     if (password.length < 6) {
-      alert("Mật khẩu phải có ít nhất 6 ký tự!");
+      toast.error("Mật khẩu phải có ít nhất 6 ký tự!");
       return false;
     }
 
     if (password !== confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
+      toast.error("Mật khẩu xác nhận không khớp!");
       return false;
     }
 
     if (!/^\d{9,12}$/.test(phone)) {
-      alert("Số điện thoại không hợp lệ!");
+      toast.error("Số điện thoại không hợp lệ!");
       return false;
     }
 
     return true;
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
 
-    // Kiểm tra form hợp lệ
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    // Ghép địa chỉ đầy đủ
+    setIsLoading(true);
+
     const fullAddress = `${
       wards.find((w) => w.code === Number(selectedWard))?.name || ""
     }, ${
@@ -128,29 +125,22 @@ export const RegisterPage = () => {
       address: fullAddress,
     };
 
-    // Gọi API tạo user
-    createUserApi(dataToSend)
-      .then((res) => {
-        console.log("Tạo user thành công:", res.data);
-        alert("Đăng ký thành công!");
-        // Có thể reset form hoặc redirect tới login page
-      })
-      .catch((err) => {
-        console.error("Lỗi tạo user:", err.response?.data || err.message);
-        alert("Đăng ký thất bại. Vui lòng thử lại!");
-      });
-  };
+    try {
+      const res = await createUserApi(dataToSend);
 
-  const allFieldsFilled =
-    formData.username &&
-    formData.password &&
-    formData.confirmPassword &&
-    formData.email &&
-    formData.full_name &&
-    formData.phone &&
-    selectedProvince &&
-    selectedDistrict &&
-    selectedWard;
+      if (res.data) {
+        toast.success("Tạo tài khoản thành công!");
+        navigate("/login");
+      } else {
+        console.log("check", res.messages.email[0]);
+        toast.error(res.messages.email[0]);
+      }
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi tạo tài khoản!", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -175,142 +165,135 @@ export const RegisterPage = () => {
         </div>
       </div>
 
-      {/* Form */}
-      <div className="w-full max-w-[512px] mx-auto">
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col bg-white shadow-[0_10px_15px_0_rgba(5,13,29,0.18)] px-4 py-6 gap-4 rounded-2xl mt-[-32px] md:mt-6"
+      {/* Input fields */}
+      <div className="w-full max-w-[512px] mx-auto flex flex-col bg-white shadow-[0_10px_15px_0_rgba(5,13,29,0.18)] px-4 py-6 gap-4 rounded-2xl mt-[-32px] md:mt-6">
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          className="py-3 px-5 border rounded-md border-gray-300"
+          value={formData.email}
+          onChange={handleChange}
+        />
+
+        <input
+          name="full_name"
+          placeholder="Họ và tên"
+          className="py-3 px-5 border rounded-md border-gray-300"
+          value={formData.full_name}
+          onChange={handleChange}
+        />
+
+        <input
+          name="phone"
+          placeholder="Số điện thoại"
+          className="py-3 px-5 border rounded-md border-gray-300"
+          value={formData.phone}
+          onChange={handleChange}
+        />
+
+        <select
+          value={selectedProvince}
+          onChange={(e) => setSelectedProvince(e.target.value)}
+          className="py-3 px-5 border rounded-md border-gray-300"
         >
-          {/* Username */}
+          <option value="">Chọn tỉnh/thành</option>
+          {provinces.map((p) => (
+            <option key={p.code} value={p.code}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedDistrict}
+          onChange={(e) => setSelectedDistrict(e.target.value)}
+          className="py-3 px-5 border rounded-md border-gray-300"
+          disabled={!districts.length}
+        >
+          <option value="">Chọn quận/huyện</option>
+          {districts.map((d) => (
+            <option key={d.code} value={d.code}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedWard}
+          onChange={(e) => setSelectedWard(e.target.value)}
+          className="py-3 px-5 border rounded-md border-gray-300"
+          disabled={!wards.length}
+        >
+          <option value="">Chọn xã/phường</option>
+          {wards.map((w) => (
+            <option key={w.code} value={w.code}>
+              {w.name}
+            </option>
+          ))}
+        </select>
+
+        <div className="relative">
           <input
-            name="username"
-            placeholder="Tên người dùng"
-            className="py-3 px-5 border rounded-md border-gray-300"
-            value={formData.username}
+            name="password"
+            placeholder="Mật khẩu"
+            className="py-3 pr-10 pl-5 border rounded-md w-full border-gray-300"
+            type={showPassword ? "text" : "password"}
+            value={formData.password}
             onChange={handleChange}
           />
-
-          {/* Email */}
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            className="py-3 px-5 border rounded-md border-gray-300"
-            value={formData.email}
-            onChange={handleChange}
-          />
-
-          {/* Full Name */}
-          <input
-            name="full_name"
-            placeholder="Họ và tên"
-            className="py-3 px-5 border rounded-md border-gray-300"
-            value={formData.full_name}
-            onChange={handleChange}
-          />
-
-          {/* Phone */}
-          <input
-            name="phone"
-            placeholder="Số điện thoại"
-            className="py-3 px-5 border rounded-md border-gray-300"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-
-          {/* Chọn tỉnh/thành */}
-          <select
-            value={selectedProvince}
-            onChange={(e) => setSelectedProvince(e.target.value)}
-            className="py-3 px-5 border rounded-md border-gray-300"
-          >
-            <option value="">Chọn tỉnh/thành</option>
-            {provinces.map((p) => (
-              <option key={p.code} value={p.code}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Chọn quận/huyện */}
-          <select
-            value={selectedDistrict}
-            onChange={(e) => setSelectedDistrict(e.target.value)}
-            className="py-3 px-5 border rounded-md border-gray-300"
-            disabled={!districts.length}
-          >
-            <option value="">Chọn quận/huyện</option>
-            {districts.map((d) => (
-              <option key={d.code} value={d.code}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Chọn xã/phường */}
-          <select
-            value={selectedWard}
-            onChange={(e) => setSelectedWard(e.target.value)}
-            className="py-3 px-5 border rounded-md border-gray-300"
-            disabled={!wards.length}
-          >
-            <option value="">Chọn xã/phường</option>
-            {wards.map((w) => (
-              <option key={w.code} value={w.code}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Password */}
-          <div className="relative">
-            <input
-              name="password"
-              placeholder="Mật khẩu"
-              className="py-3 pr-10 pl-5 border rounded-md w-full border-gray-300"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleChange}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              {showPassword ? "🙈" : "👁️"}
-            </button>
-          </div>
-
-          {/* Confirm Password */}
-          <div className="relative">
-            <input
-              name="confirmPassword"
-              placeholder="Xác nhận mật khẩu"
-              className="py-3 pr-10 pl-5 border rounded-md w-full border-gray-300"
-              type={showConfirmPassword ? "text" : "password"}
-              value={formData.confirmPassword}
-              onChange={handleChange}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              {showConfirmPassword ? "🙈" : "👁️"}
-            </button>
-          </div>
-
-          {/* Submit */}
           <button
-            type="submit"
-            disabled={!allFieldsFilled}
-            className={`py-3 px-6 rounded-lg bg-primary text-white text-base font-medium hover:opacity-90 ${
-              !allFieldsFilled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2"
           >
-            Tạo tài khoản
+            {showPassword ? "🙈" : "👁️"}
           </button>
-        </form>
+        </div>
+
+        <div className="relative">
+          <input
+            name="confirmPassword"
+            placeholder="Xác nhận mật khẩu"
+            className="py-3 pr-10 pl-5 border rounded-md w-full border-gray-300"
+            type={showConfirmPassword ? "text" : "password"}
+            value={formData.confirmPassword}
+            onChange={handleChange}
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2"
+          >
+            {showConfirmPassword ? "🙈" : "👁️"}
+          </button>
+        </div>
+
+        <Button
+          onClick={handleSubmit}
+          style={{
+            backgroundColor: "rgb(200 16 46)",
+            color: "white",
+            border: "none",
+            padding: "12px 40px",
+            fontSize: "16px",
+            fontWeight: "bold",
+            height: "40px",
+          }}
+          loading={isLoading}
+        >
+          Tạo tài khoản
+        </Button>
+
+        {/* Sign up */}
+        <div className="text-center">
+          <p className="text-sm">
+            Tôi đã có tài khoản{" "}
+            <Link className="text-primary underline" to="/login">
+              Đăng nhập
+            </Link>
+          </p>
+        </div>
       </div>
     </>
   );

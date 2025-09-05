@@ -24,7 +24,6 @@ const createUserApi = (userData) => {
 
   // userData phải chứa: username, password, email, full_name, address, phone
   const data = {
-    username: userData.username,
     password: userData.password,
     email: userData.email,
     full_name: userData.full_name,
@@ -67,6 +66,17 @@ const apiAddCart = (id,quantity) =>{
     }
     return axios.post(URL_BACKEND, data)
 }
+
+const logoutApi = () => {
+    const URL_BACKEND = "/api/auth/logout"
+     return axios.post(URL_BACKEND);
+}
+
+const updateUserApi = (id, updatedUserData) => {
+  const URL_BACKEND = `/api/users/${id}`;
+  return axios.put(URL_BACKEND, updatedUserData);
+};
+
 export {
     getAllProducts,
     getAllCategories,
@@ -75,5 +85,7 @@ export {
     loginApi,
     getAccountAPI,
     getCart,
-    apiAddCart
+    apiAddCart,
+    logoutApi,
+    updateUserApi
 };

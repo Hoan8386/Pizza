@@ -2,7 +2,6 @@ import { createContext, useState } from "react";
 
 const AuthContext = createContext({
   id: null,
-  username: "",
   email: "",
   full_name: "",
   address: "",
@@ -13,7 +12,6 @@ const AuthContext = createContext({
 const AuthWrapper = ({ children }) => {
   const [user, setUser] = useState({
     id: null,
-    username: "",
     email: "",
     full_name: "",
     address: "",

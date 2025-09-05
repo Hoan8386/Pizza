@@ -4,7 +4,8 @@ import logo2 from "../assets/PizzaHut.jpg";
 import { loginApi } from "../services/api.service";
 import { AuthContext } from "../components/context/auth.context";
 import { useNavigate } from "react-router-dom";
-
+import { ToastContainer, toast } from "react-toastify";
+import { Button } from "antd";
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,16 +16,24 @@ export const LoginPage = () => {
   const toggleShowPassword = () => setShowPassword((prev) => !prev);
 
   const { setUser } = useContext(AuthContext);
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // const [isLoading, setLoading] = useState(false);
+  const handleSubmit = async () => {
+    setIsLoading(true);
     console.log("Email:", email, "Password:", password);
     const res = await loginApi(email, password);
     if (res?.data) {
       const { token, user } = res.data;
       localStorage.setItem("access_token", token);
       setUser(user);
+      toast.success("Đăng nhập thành công");
       navigate("/");
+    } else {
+      toast.error(res.message);
+      console.log("check log", res);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -146,7 +155,8 @@ export const LoginPage = () => {
                 <button
                   type="button"
                   onClick={handleClearEmail}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  style={{}}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 "
                 >
                   ✕
                 </button>
@@ -192,13 +202,21 @@ export const LoginPage = () => {
           </div>
 
           {/* Submit */}
-          <button
-            type="submit"
-            className="py-3 px-6 rounded-lg bg-primary text-white text-base font-medium hover:opacity-90"
+          <Button
+            onClick={handleSubmit}
+            style={{
+              backgroundColor: "rgb(200 16 46)",
+              color: "white",
+              border: "none",
+              padding: "12px 40px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              height: "40px",
+            }}
+            loading={isLoading}
           >
-            Đăng Nhập
-          </button>
-
+            Đăng nhập
+          </Button>
           {/* Sign up */}
           <div className="text-center">
             <p className="text-sm">
