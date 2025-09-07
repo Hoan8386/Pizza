@@ -55,11 +55,17 @@ const Navbar = () => {
             <h3>Bạn đang ở đâu ?</h3>
           </div>
           <div className="flex-1 flex justify-center items-center ">
-            <img
-              src={logo}
-              alt=""
-              style={{ height: "42px", margin: "0 auto ", lineHeight: "100%" }}
-            />
+            <Link to="/">
+              <img
+                src={logo}
+                alt=""
+                style={{
+                  height: "42px",
+                  margin: "0 auto ",
+                  lineHeight: "100%",
+                }}
+              />
+            </Link>
           </div>
           <div className="flex-1  flex justify-end items-center gap-6">
             <BellOutlined
@@ -73,25 +79,27 @@ const Navbar = () => {
             >
               VI
             </Popover>
-            <div
-              className="cart flex "
-              style={{
-                fontSize: "1.2rem",
-                border: "1px solid #ccc",
-                padding: "8px 12px",
-                borderRadius: "50px",
-                height: "40px",
-              }}
-            >
-              <span
+            <Link to="/cart">
+              <div
+                className="cart flex "
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "1.2rem",
+                  border: "1px solid #ccc",
+                  padding: "8px 12px",
+                  borderRadius: "50px",
+                  height: "40px",
                 }}
               >
-                {cart?.items?.length || 0}
-              </span>
-              <ShoppingCartOutlined className="ml-2" />
-            </div>
+                <span
+                  style={{
+                    fontSize: "1rem",
+                  }}
+                >
+                  {cart?.items?.length || 0}
+                </span>
+                <ShoppingCartOutlined className="ml-2" />
+              </div>
+            </Link>
             <div
               className="relative"
               onMouseEnter={() => setShowMenu(true)}

@@ -11,6 +11,8 @@ import { AuthContext } from "./components/context/auth.context";
 import LayoutApp from "./components/share/Layout.app";
 import { Spin } from "antd";
 import { InfoPage } from "./pages/Info.page";
+import { CartPage } from "./pages/Cart.page";
+import { CheckOut } from "./components/client/checkout/CheckOut";
 
 const LayoutClient = () => {
   const { isAppLoading } = useContext(AuthContext);
@@ -54,8 +56,8 @@ function App() {
         // { index: true, element: <HomePage /> },
         { index: true, element: <HomePage></HomePage> },
         { path: "/info", element: <InfoPage /> },
-        // { path: "/about", element: <AboutPage /> },
-        // { path: "/info", element: <PrivateRoute>  <InfoPage /></PrivateRoute> },
+        { path: "/cart", element: <CartPage /> },
+        { path: "/checkout", element: <CheckOut /> },
         // { path: "/order", element: <PrivateRoute> <OrderPage /> </PrivateRoute> },
       ],
     },

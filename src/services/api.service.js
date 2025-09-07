@@ -1,3 +1,4 @@
+
 import axios from './axios.customize';
 
 // Lấy tất cả sản phẩm
@@ -17,7 +18,6 @@ const getProductsByCategory = (categoryId) => {
     const URL_BACKEND = `api/products?category_id=${categoryId}`;
     return axios.get(URL_BACKEND);
 };
-
 
 const createUserApi = (userData) => {
   const URL_BACKEND = "/api/users";
@@ -77,6 +77,62 @@ const updateUserApi = (id, updatedUserData) => {
   return axios.put(URL_BACKEND, updatedUserData);
 };
 
+
+const getCartApi = () =>{
+    const URL_BACKEND =  "/api/cart"
+      return axios.get(URL_BACKEND);
+}
+
+const updateCartApi = (id,quantity) =>{
+    const URL_BACKEND = `/api/cart/items/${id}`
+     const data = {
+        quantity: quantity,
+
+    }
+    return axios.put(URL_BACKEND,data);
+}
+
+const deleteCartApi = (id) =>{
+    const URL_BACKEND = `/api/cart/items/${id}`
+   
+    return axios.delete(URL_BACKEND);
+}
+
+const getCoupon = (code,order_amount) =>{
+    const URL_BACKEND ="/api/coupons/validate"
+    const data ={
+        code:code,
+    order_amount:order_amount
+    }
+return axios.post(URL_BACKEND,data);
+}
+
+
+const createOrder = (shipping_address,coupon_code) =>{
+    const URL_BACKEND ="/api/orders"
+    const data ={
+        shipping_address:shipping_address,
+    coupon_code:coupon_code
+    }
+return axios.post(URL_BACKEND,data);
+}
+
+const checkOutApi = (order_id,amount,method) =>{
+    const URL_BACKEND ="/api/orders"
+    const data ={
+        order_id:order_id,
+    amount:amount,
+    method:method
+    }
+return axios.post(URL_BACKEND,data);
+}
+
+// const checkOutCartApi = (id) =>{
+//     const URL_BACKEND = "/api/payments"
+   
+//     return axios.delete(URL_BACKEND);
+// }
+
 export {
     getAllProducts,
     getAllCategories,
@@ -87,5 +143,11 @@ export {
     getCart,
     apiAddCart,
     logoutApi,
-    updateUserApi
+    updateUserApi,
+    getCartApi,
+    updateCartApi,
+    deleteCartApi,
+    getCoupon,
+    createOrder,
+    checkOutApi
 };
