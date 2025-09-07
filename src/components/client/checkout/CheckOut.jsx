@@ -1,8 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../context/auth.context";
-import { checkOutApi, createOrder } from "../../../services/api.service";
+import {
+  checkOutApi,
+  createOrder,
+  getCart,
+} from "../../../services/api.service";
 import { toast } from "react-toastify";
 import { Button } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -21,6 +25,7 @@ export const CheckOut = () => {
   const [selectedWard, setSelectedWard] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
   const navigate = useNavigate();
+  const { setCart } = useContext(AuthContext);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -61,6 +66,19 @@ export const CheckOut = () => {
     }
   }, [selectedDistrict]);
 
+  const fetchCart = async () => {
+    const res = await getCart();
+    if (res.data) {
+      setCart({
+        id: res.data.cart.id,
+        user_id: res.data.cart.user_id,
+        totalItems: res.data.items.length,
+        totalPrice: res.data.total,
+        items: res.data.items,
+      });
+    }
+  };
+
   // đặt hàng
   const handlePlaceOrder = async () => {
     setIsLoading(true);
@@ -96,9 +114,10 @@ export const CheckOut = () => {
 
         if (!paymentRes?.data?.error) {
           toast.success("Thanh toán thành công");
+          fetchCart();
           setTimeout(() => {
             navigate("/");
-          }, 3000);
+          }, 1000);
         } else {
           toast.error("Thanh toán thất bại");
         }

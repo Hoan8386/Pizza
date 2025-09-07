@@ -127,11 +127,13 @@ const checkOutApi = (order_id,amount,method) =>{
 return axios.post(URL_BACKEND,data);
 }
 
-// const checkOutCartApi = (id) =>{
-//     const URL_BACKEND = "/api/payments"
-   
-//     return axios.delete(URL_BACKEND);
-// }
+const forgotPassword = (email) =>{
+    const URL_BACKEND = "/api/password/forgot"
+   const data ={
+        email:email,
+    }
+    return axios.post(URL_BACKEND,data);
+}
 
 export {
     getAllProducts,
@@ -149,5 +151,6 @@ export {
     deleteCartApi,
     getCoupon,
     createOrder,
-    checkOutApi
+    checkOutApi,
+    forgotPassword
 };

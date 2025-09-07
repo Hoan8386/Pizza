@@ -1,50 +1,29 @@
-import { useContext, useState } from "react";
-import logo from "../assets/logo.svg";
-import logo2 from "../assets/PizzaHut.jpg";
-import { loginApi } from "../services/api.service";
-import { AuthContext } from "../components/context/auth.context";
-import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { useState } from "react";
+import logo2 from "../../../assets/PizzaHut.jpg";
 import { Button } from "antd";
-export const LoginPage = () => {
+import { forgotPassword } from "../../../services/api.service";
+import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+
+const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const handleClearEmail = () => setEmail("");
-
-  const navigate = useNavigate();
-  const toggleShowPassword = () => setShowPassword((prev) => !prev);
-
-  const { setUser } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
 
-  // const [isLoading, setLoading] = useState(false);
   const handleSubmit = async () => {
     setIsLoading(true);
-    console.log("Email:", email, "Password:", password);
-    const res = await loginApi(email, password);
+    const res = await forgotPassword(email);
+    console.log(res.data);
     if (res?.data) {
-      const { token, user } = res.data;
-      localStorage.setItem("access_token", token);
-      setUser(user);
-      toast.success("Đăng nhập thành công");
-      navigate("/");
+      toast.success(res.data.message);
     } else {
-      toast.error(res.message);
-      console.log("check log", res);
+      toast.error(res.error);
     }
     setIsLoading(false);
   };
-
   return (
     <>
-      {/* Logo */}
-      <div className="flex justify-center p-4">
-        <img src={logo} alt="Logo" />
-      </div>
-
-      {/* Header đỏ */}
-      <div className="flex justify-center mx-auto">
+      <div className="flex justify-center mx-auto mt-6">
         <div
           className="w-[521px] pt-2 pb-14 rounded-2xl flex flex-col items-center"
           style={{ backgroundColor: "rgb(200 16 46)" }}
@@ -127,79 +106,34 @@ export const LoginPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Form */}
-      <div className="w-full max-w-[512px] mx-auto">
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col bg-white shadow-[0_10px_15px_0_rgba(5,13,29,0.18)] px-4 py-6 gap-4 rounded-2xl mt-[-32px] md:mt-6"
-        >
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium mb-2 text-black"
-            >
-              Email
-            </label>
-            <div className="relative">
-              <input
-                id="email"
-                placeholder="Vui lòng nhập email của bạn"
-                className="py-3 pr-10 pl-5 block w-full rounded-md text-base font-normal border border-gray-300 focus:border-secondary focus:border-[1px] focus:ring-0"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {email && (
-                <button
-                  type="button"
-                  onClick={handleClearEmail}
-                  style={{}}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 "
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Password */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium mb-2 text-black"
-            >
-              Mật khẩu
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                placeholder="Vui lòng nhập mật khẩu của bạn"
-                className="py-3 pr-10 pl-5 block w-full rounded-md text-base font-normal border border-gray-300 focus:border-secondary focus:border-[1px] focus:ring-0"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+      <div className="w-6xl m-auto mt-6">
+        {/* Email */}
+        <div className="m-auto" style={{ width: "512px" }}>
+          <label
+            htmlFor="email"
+            className="block text-xl font-medium mb-2 text-black"
+          >
+            Email
+          </label>
+          <div className="relative">
+            <input
+              id="email"
+              placeholder="Vui lòng nhập email của bạn"
+              className="py-3 pr-10 pl-5 block w-full rounded-md text-base font-normal border border-gray-300 focus:border-secondary focus:border-[1px] focus:ring-0"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            {email && (
               <button
                 type="button"
-                onClick={toggleShowPassword}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={handleClearEmail}
+                style={{}}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 "
               >
-                {showPassword ? "🙈" : "👁️"}
+                ✕
               </button>
-            </div>
-          </div>
-
-          {/* Forgot password */}
-          <div className="text-right">
-            <Link
-              to={"/forgot"}
-              className="text-primary underline text-sm leading-5"
-              href="/forgot-password"
-            >
-              Quên mật khẩu
-            </Link>
+            )}
           </div>
 
           {/* Submit */}
@@ -213,22 +147,27 @@ export const LoginPage = () => {
               fontSize: "16px",
               fontWeight: "bold",
               height: "40px",
+              width: "100%",
+              marginTop: "20px",
             }}
             loading={isLoading}
           >
-            Đăng nhập
+            Quên mật khẩu
           </Button>
-          {/* Sign up */}
-          <div className="text-center">
-            <p className="text-sm">
-              Bạn chưa có tài khoản?{" "}
-              <a className="text-primary underline" href="/register">
-                Tạo tài khoản
-              </a>
-            </p>
-          </div>
-        </form>
+
+          <Link
+            style={{
+              marginTop: "20px",
+            }}
+            className="mt-5 text-gray-500 underline"
+            to="/login"
+          >
+            quay về trang đăng nhập
+          </Link>
+        </div>
       </div>
     </>
   );
 };
+
+export default ForgotPassword;

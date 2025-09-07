@@ -13,6 +13,7 @@ import { Spin } from "antd";
 import { InfoPage } from "./pages/Info.page";
 import { CartPage } from "./pages/Cart.page";
 import { CheckOut } from "./components/client/checkout/CheckOut";
+import ForgotPassword from "./components/client/forgot/ForgotPassword";
 
 const LayoutClient = () => {
   const { isAppLoading } = useContext(AuthContext);
@@ -67,7 +68,7 @@ function App() {
     // // Auth Pages
     { path: "/login", element: <LoginPage /> },
     { path: "/register", element: <RegisterPage /> },
-    // { path: "/confirm", element: <ConfirmPage /> },
+    { path: "/forgot", element: <ForgotPassword /> },
     // { path: "/unauthorized", element: <Unauthorized /> },
   ]);
 

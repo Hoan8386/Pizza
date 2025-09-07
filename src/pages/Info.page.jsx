@@ -13,6 +13,7 @@ import axios from "axios";
 import { updateUserApi } from "../services/api.service";
 import { toast } from "react-toastify";
 import { Button } from "antd";
+import ModelResetPassword from "../components/client/resetPassword/RestPassword";
 
 export const InfoPage = () => {
   const { user, setUser } = useContext(AuthContext); // Assume setUser is available to update context
@@ -177,6 +178,19 @@ export const InfoPage = () => {
     setIsLoading(false);
   };
 
+  const [open, setOpen] = useState(false);
+  const [model, setModel] = useState({
+    email: "",
+    token: "",
+    password: "",
+    password_confirmation: "",
+  });
+
+  const handleOk = () => {
+    console.log("Dữ liệu gửi API:", model);
+    setOpen(false);
+  };
+
   return (
     <>
       <style>
@@ -251,13 +265,14 @@ export const InfoPage = () => {
                 </Link>
               </li>
               <li>
-                <Link
+                <button
+                  onClick={() => setOpen(true)}
                   to="/change-password"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 w-full"
                 >
                   <LockOutlined />
                   Đổi mật khẩu
-                </Link>
+                </button>
               </li>
             </ul>
           </div>
@@ -427,6 +442,14 @@ export const InfoPage = () => {
           </form>
         </div>
       </div>
+
+      <ModelResetPassword
+        open={open}
+        onCancel={() => setOpen(false)}
+        onOk={handleOk}
+        model={model}
+        setModel={setModel}
+      />
     </>
   );
 };

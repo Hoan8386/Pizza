@@ -5,7 +5,11 @@ import {
   getCoupon,
   updateCartApi,
 } from "../services/api.service";
-import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  CloseOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { Button, Input, InputNumber, Modal } from "antd";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
@@ -56,40 +60,50 @@ export const CartPage = () => {
   const [totalAfterDiscount, setTotalAfterDiscount] = useState("");
 
   const checkCoupon = async () => {
-    setIsLoading(true);
-    const res = await getCoupon(coupon, totalPrice);
-    console.log(res.data);
-    if (res.data.valid === true) {
-      toast.success("Áp dụng mã giãm giá thành công");
-      setTotalAfterDiscount(totalPrice - res.data.discount);
-      setDiscount(res.data.discount);
-      setCouponCode(res.data.coupon.code);
-      console.log("check code ", res.data.coupon.code);
+    if (products.length === 0) {
+      toast.warning("Không có sản phẩm nào");
     } else {
-      toast.error("Áp dụng mã giãm giá thất bại");
+      setIsLoading(true);
+      const res = await getCoupon(coupon, totalPrice);
+      console.log(res.data);
+      if (res.data.valid === true) {
+        toast.success("Áp dụng mã giãm giá thành công");
+        setTotalAfterDiscount(totalPrice - res.data.discount);
+        setDiscount(res.data.discount);
+        setCouponCode(res.data.coupon.code);
+        console.log("check code ", res.data.coupon.code);
+      } else {
+        toast.error("Áp dụng mã giãm giá thất bại");
+      }
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const checkout = () => {
-    setIsLoading(true);
-    const discountData = {
-      discount: discount,
-      totalAfterDiscount: totalAfterDiscount,
-      totalPrice: totalPrice,
-      discountCode: couponCode,
-    };
-    setIsLoading(false);
+    if (products.length === 0) {
+      toast.warning("Không có sản phẩm nào");
+    } else {
+      setIsLoading(true);
+      const discountData = {
+        discount: discount,
+        totalAfterDiscount: totalAfterDiscount,
+        totalPrice: totalPrice,
+        discountCode: couponCode,
+      };
+      setIsLoading(false);
 
-    // Điều hướng sang Checkout kèm dữ liệu
-    navigate("/checkout", { state: discountData });
+      // Điều hướng sang Checkout kèm dữ liệu
+      navigate("/checkout", { state: discountData });
+    }
   };
 
   return (
     <>
       <div className="flex justify-center">
         <div className="flex-1">
-          <Link to="/">Trở lại</Link>
+          <Link to="/">
+            <ArrowLeftOutlined /> Trở lại
+          </Link>
         </div>
         <div className="flex-2 md:py-6 ">
           <p className="text-base text-center md:text-3xl font-semibold md:font-bold whitespace-pre overflow-hidden text-ellipsis">
