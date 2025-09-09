@@ -135,6 +135,15 @@ const forgotPassword = (email) =>{
     return axios.post(URL_BACKEND,data);
 }
 
+const changePassword = (current_password,new_password,new_password_confirmation)=>{
+  const URL_BACKEND = "/api/users/change-password"
+   const data ={
+        current_password:current_password,
+        new_password:new_password,
+        new_password_confirmation:new_password_confirmation
+    }
+    return axios.post(URL_BACKEND,data);
+}
 export {
     getAllProducts,
     getAllCategories,
@@ -152,5 +161,6 @@ export {
     getCoupon,
     createOrder,
     checkOutApi,
-    forgotPassword
+    forgotPassword,
+    changePassword
 };

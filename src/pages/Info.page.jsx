@@ -10,7 +10,7 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
-import { updateUserApi } from "../services/api.service";
+import { changePassword, updateUserApi } from "../services/api.service";
 import { toast } from "react-toastify";
 import { Button } from "antd";
 import ModelResetPassword from "../components/client/resetPassword/RestPassword";
@@ -166,7 +166,6 @@ export const InfoPage = () => {
 
     try {
       const res = await updateUserApi(user.id, updatedUserData);
-      console.log("Cập nhật thành công:", res.data);
       toast.success("Đăng nhập thành công ");
 
       setUser(res.data); // Cập nhật context
@@ -177,18 +176,44 @@ export const InfoPage = () => {
     }
     setIsLoading(false);
   };
-
+  const [isLoadChange, setIsLoadChange] = useState(false);
   const [open, setOpen] = useState(false);
   const [model, setModel] = useState({
-    email: "",
-    token: "",
-    password: "",
-    password_confirmation: "",
+    email: user.email,
+    current_password: "",
+    new_password: "",
+    new_password_confirmation: "",
   });
+  const clear = () => {
+    setModel({
+      email: user.email,
+      current_password: "",
+      new_password: "",
+      new_password_confirmation: "",
+    });
+  };
+  const handleOk = async () => {
+    try {
+      setIsLoadChange(true);
+      const res = await changePassword(
+        model.current_password,
+        model.new_password,
+        model.new_password_confirmation
+      );
 
-  const handleOk = () => {
-    console.log("Dữ liệu gửi API:", model);
-    setOpen(false);
+      if (res.data?.message) {
+        toast.success("Đổi mật khẩu thành công");
+      } else {
+        toast.error(res.error || "Có lỗi xảy ra");
+      }
+
+      clear(); // reset form
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Lỗi kết nối server");
+    } finally {
+      setIsLoadChange(false);
+      setOpen(false);
+    }
   };
 
   return (
@@ -449,6 +474,7 @@ export const InfoPage = () => {
         onOk={handleOk}
         model={model}
         setModel={setModel}
+        isLoadChange={isLoadChange}
       />
     </>
   );
