@@ -32,7 +32,7 @@ const Select = (props) => {
     scrollRef.current.scrollBy({ left: 150, behavior: "smooth" });
   };
   // Lấy banner của category đang active
-  const activeBanner = categories[activeIndex]?.url; // giả sử categories[i].banner = URL ảnh
+  const activeBanner = categories[activeIndex - 1]?.url; // giả sử categories[i].banner = URL ảnh
   return (
     <>
       <div className="relative flex items-center">
@@ -50,9 +50,9 @@ const Select = (props) => {
           {categories.map((item, index) => (
             <li
               key={index}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => setActiveIndex(item.id)}
               className={`relative cursor-pointer transition-colors duration-300 flex-none text-center min-w-[100px] ${
-                activeIndex === index
+                activeIndex === item.id
                   ? "text-red-700 font-bold"
                   : "text-gray-800"
               } hover:text-red-500 p-6`}
@@ -65,7 +65,7 @@ const Select = (props) => {
               </div>
               <span
                 className={`absolute bottom-[18px] h-[3px] bg-red-700 transition-all duration-300 ${
-                  activeIndex === index ? "w-full left-0" : "w-0 left-1/2"
+                  activeIndex === item.id ? "w-full left-0" : "w-0 left-1/2"
                 }`}
               ></span>
             </li>

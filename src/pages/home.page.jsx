@@ -3,25 +3,44 @@ import { Banner } from "../components/client/banner/banner";
 import Select from "../components/client/select/select";
 import {
   getAllCategories,
+  getCombosApi,
   getProductsByCategory,
 } from "../services/api.service";
 import { ProductListItem } from "../components/client/product/Products";
+import { CombosListItem } from "../components/client/combos/Combos";
 
 export const HomePage = () => {
   const [products, setProducts] = useState([]);
+  const [combos, setCombos] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(1);
+  const [isCombos, setIsCombos] = useState(false);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getProductsByCategory(activeIndex + 1);
-        setProducts(result.data); // tùy API trả về
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
+    if (activeIndex === 10) {
+      setIsCombos(true);
+      const fetchCombos = async () => {
+        try {
+          const result = await getCombosApi();
+          setCombos(result.data); // tùy API trả về
+          console.log("combos", ...result.data);
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        }
+      };
+      fetchCombos();
+    } else {
+      setIsCombos(false);
 
-    fetchData();
+      const fetchData = async () => {
+        try {
+          const result = await getProductsByCategory(activeIndex);
+          setProducts(result.data); // tùy API trả về
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        }
+      };
+      fetchData();
+    }
   }, [activeIndex]);
 
   useEffect(() => {
@@ -47,7 +66,11 @@ export const HomePage = () => {
           activeIndex={activeIndex}
           setActiveIndex={setActiveIndex}
         />
-        <ProductListItem products={products} />
+        {isCombos === true ? (
+          <CombosListItem combos={combos} />
+        ) : (
+          <ProductListItem products={products} />
+        )}
       </div>
     </>
   );

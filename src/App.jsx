@@ -14,6 +14,7 @@ import { InfoPage } from "./pages/Info.page";
 import { CartPage } from "./pages/Cart.page";
 import { CheckOut } from "./components/client/checkout/CheckOut";
 import ForgotPassword from "./components/client/forgot/ForgotPassword";
+import { DetailCombo } from "./components/client/combos/Detail.page";
 
 const LayoutClient = () => {
   const { isAppLoading } = useContext(AuthContext);
@@ -59,6 +60,7 @@ function App() {
         { path: "/info", element: <InfoPage /> },
         { path: "/cart", element: <CartPage /> },
         { path: "/checkout", element: <CheckOut /> },
+        { path: "/combos/:id", element: <DetailCombo /> },
         // { path: "/order", element: <PrivateRoute> <OrderPage /> </PrivateRoute> },
       ],
     },

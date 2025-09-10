@@ -19,6 +19,11 @@ const getProductsByCategory = (categoryId) => {
     return axios.get(URL_BACKEND);
 };
 
+
+const getCombosApi = ()=>{
+ const URL_BACKEND = "/api/combos";
+    return axios.get(URL_BACKEND);
+}
 const createUserApi = (userData) => {
   const URL_BACKEND = "/api/users";
 
@@ -162,5 +167,7 @@ export {
     createOrder,
     checkOutApi,
     forgotPassword,
-    changePassword
+    changePassword,
+ getCombosApi 
+
 };
