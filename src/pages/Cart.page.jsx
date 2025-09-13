@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   deleteCartApi,
   getCartApi,
@@ -13,6 +13,7 @@ import {
 import { Button, Input, InputNumber, Modal } from "antd";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../components/context/auth.context";
 
 export const CartPage = () => {
   const [products, setProducts] = useState([]);
@@ -23,12 +24,20 @@ export const CartPage = () => {
   const [couponCode, setCouponCode] = useState();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { setCart } = useContext(AuthContext);
 
   const fetchData = async () => {
     try {
-      const result = await getCartApi();
-      setProducts(result.data.items); // Adjust based on API response
-      setTotalPrice(result.data.total); // Adjust based on API response
+      const res = await getCartApi();
+      setProducts(res.data.items); // Adjust based on API response
+      setTotalPrice(res.data.total); // Adjust based on API response
+      setCart({
+        id: res.data.cart.id,
+        user_id: res.data.cart.user_id,
+        totalItems: res.data.items.length,
+        totalPrice: res.data.total,
+        items: res.data.items,
+      });
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -41,6 +50,19 @@ export const CartPage = () => {
   const handleRemoveFromCart = (id) => {
     setDeleteId(id);
     setIsModalOpen(true);
+  };
+
+  const removeItem = async () => {
+    try {
+      await deleteCartApi(deleteId);
+      fetchData();
+      toast.success("Xóa sản phẩm thành công");
+    } catch (e) {
+      console.error("Failed to remove item:", e);
+    } finally {
+      setIsModalOpen(false);
+      setDeleteId(null);
+    }
   };
 
   // Function to update quantity
@@ -129,28 +151,45 @@ export const CartPage = () => {
                   <div className="w-[100px] h-[100px] flex-shrink-0 overflow-hidden rounded-xl">
                     <img
                       src={`http://localhost:8000/images${item.image_url}`}
-                      alt={item.product_name}
+                      alt={
+                        item.type === "product"
+                          ? item.product_name
+                          : item.combo_name
+                      }
                       className="w-full h-full object-cover scale-110"
                     />
                   </div>
+
                   <div className="ml-4">
+                    {/* Tên hiển thị */}
                     <h6 className="text-lg md:text-xl font-semibold text-gray-800 line-clamp-2">
-                      {item.product_name}
+                      {item.type === "product"
+                        ? item.product_name
+                        : item.combo_name}
                     </h6>
-                    <p className="text-gray-500" style={{ fontSize: "16px" }}>
-                      Cỡ: {item.variant_info.size}
-                    </p>
-                    <p
-                      className="text-sm text-gray-500"
-                      style={{ fontSize: "16px" }}
-                    >
-                      Đế: {item.variant_info.crust}
-                    </p>
+
+                    {/* Nếu là product thì có size + crust */}
+                    {item.type === "product" && (
+                      <>
+                        <p
+                          className="text-gray-500"
+                          style={{ fontSize: "16px" }}
+                        >
+                          Cỡ: {item.variant_info.size}
+                        </p>
+                        <p
+                          className="text-gray-500"
+                          style={{ fontSize: "16px" }}
+                        >
+                          Đế: {item.variant_info.crust}
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
 
+                {/* Column 2: Quantity + Price + Remove */}
                 <div className="flex-1 flex">
-                  {/* Column 2: Quantity */}
                   <InputNumber
                     style={{ width: "80px" }}
                     disabled={isDisabled}
@@ -162,13 +201,14 @@ export const CartPage = () => {
                     }}
                   />
 
-                  {/* Column 3a: Price */}
+                  {/* Price */}
                   <div className="flex-3 text-right pr-2">
                     <span className="text-lg font-semibold text-red-600">
                       {item.subtotal.toLocaleString()}₫
                     </span>
                   </div>
-                  {/* Column 3b: Remove */}
+
+                  {/* Remove button */}
                   <div className="flex-1 text-right">
                     <button
                       onClick={() => handleRemoveFromCart(item.id)}
@@ -291,18 +331,7 @@ export const CartPage = () => {
         okText="Xóa"
         cancelText="Hủy"
         okButtonProps={{ danger: true }}
-        onOk={async () => {
-          try {
-            await deleteCartApi(deleteId);
-            fetchData();
-            toast.success("Xóa sản phẩm thành công");
-          } catch (e) {
-            console.error("Failed to remove item:", e);
-          } finally {
-            setIsModalOpen(false);
-            setDeleteId(null);
-          }
-        }}
+        onOk={removeItem}
         onCancel={() => {
           setIsModalOpen(false);
           setDeleteId(null);

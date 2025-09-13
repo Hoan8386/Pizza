@@ -149,6 +149,55 @@ const changePassword = (current_password,new_password,new_password_confirmation)
     }
     return axios.post(URL_BACKEND,data);
 }
+
+const addComboCartApi = (combo_id,quantity) =>{
+     const URL_BACKEND = "/api/cart/items";
+    const data = {
+        combo_id: combo_id,
+        quantity: quantity,
+
+    }
+    return axios.post(URL_BACKEND, data)
+}
+
+const getAllFaqs = () =>{
+    const URL_BACKEND =  "/api/faqs"
+      return axios.get(URL_BACKEND);
+}
+ 
+ const searchProduct = (keyword) => {
+  if (keyword && keyword.trim() !== "") {
+    return axios.get("/api/products", {
+      params: { search: keyword },
+    });
+  }
+  // Không truyền keyword thì lấy tất cả
+  return axios.get("/api/products");
+};
+
+const getAllOrder =  () =>{
+ const URL_BACKEND =  "/api/orders"
+      return axios.get(URL_BACKEND);
+}
+
+
+const getReviewProductApi = (product_id) =>{
+    
+    return axios.get("/api/reviews", {
+      params: { product_id: product_id },
+    });
+} 
+
+const reviewProductApi  = (product_id,rating,comment) =>{
+     const URL_BACKEND = "/api/reviews";
+    const data = {
+        product_id: product_id,
+        rating: rating,
+        comment: comment,
+
+    }
+    return axios.post(URL_BACKEND, data)
+}
 export {
     getAllProducts,
     getAllCategories,
@@ -168,6 +217,11 @@ export {
     checkOutApi,
     forgotPassword,
     changePassword,
- getCombosApi 
-
+    getCombosApi ,
+    addComboCartApi,
+    getAllFaqs,
+    searchProduct,
+    getAllOrder,
+    getReviewProductApi,
+    reviewProductApi
 };

@@ -8,6 +8,8 @@ import {
 } from "../services/api.service";
 import { ProductListItem } from "../components/client/product/Products";
 import { CombosListItem } from "../components/client/combos/Combos";
+import { QA } from "../components/client/QA/QA";
+import { Search } from "../components/client/search/Search";
 
 export const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -71,6 +73,8 @@ export const HomePage = () => {
         ) : (
           <ProductListItem products={products} />
         )}
+        <Search />
+        <QA />
       </div>
     </>
   );

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { ModelProduct } from "../model/ModelProduct";
+import { ModelReviewProduct } from "../ratting/Review";
 
 export const ProductListItem = ({ products }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [reviewProduct, setReviewProduct] = useState(null);
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
@@ -48,6 +50,15 @@ export const ProductListItem = ({ products }) => {
                   <span className="text-white bg-red-700 px-1.5 mt-2 inline-block h-6 leading-6 rounded-md">
                     NEW
                   </span>
+                  <div
+                    className="mt-3 text-red-700 hover:text-red-600"
+                    onClick={(e) => {
+                      e.stopPropagation(); // chặn click lan ra ngoài
+                      setReviewProduct(item);
+                    }}
+                  >
+                    Xem đánh giá
+                  </div>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Chỉ từ </p>
@@ -72,6 +83,13 @@ export const ProductListItem = ({ products }) => {
         <ModelProduct
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
+        />
+      )}
+
+      {reviewProduct && (
+        <ModelReviewProduct
+          product={reviewProduct}
+          onClose={() => setReviewProduct(null)}
         />
       )}
     </>

@@ -150,17 +150,17 @@ const Navbar = () => {
                           <p className="text-sm text-gray-600">{user.email}</p>
                         </div>
                       </Link>
+                      <Link
+                        to="/order"
+                        className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"
+                      >
+                        Theo dõi đơn hàng
+                      </Link>
                     </>
                   )}
 
                   <div className="bg-gray-300 w-full h-[1px]" />
 
-                  <a
-                    href="#"
-                    className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"
-                  >
-                    Theo dõi đơn hàng
-                  </a>
                   <a
                     href="#"
                     className="duration-100 block py-3 pl-5 md:py-2 md:pl-4 hover:font-bold hover:text-red-700 cursor-pointer"

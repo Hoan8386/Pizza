@@ -1,19 +1,49 @@
+import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { addComboCartApi, getCart } from "../../../services/api.service";
+import { toast } from "react-toastify";
+import { Button } from "antd";
+import { AuthContext } from "../../context/auth.context";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 
 export const DetailCombo = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const combo = location.state?.combo;
+  const [isLoading, setIsLoading] = useState(false);
+  const { setCart } = useContext(AuthContext);
 
   if (!combo) {
     navigate(-1);
     return null;
   }
-
+  const fetchCart = async () => {
+    const res = await getCart();
+    if (res.data) {
+      setCart({
+        id: res.data.cart.id,
+        user_id: res.data.cart.user_id,
+        totalItems: res.data.items.length,
+        totalPrice: res.data.total,
+        items: res.data.items,
+      });
+    }
+  };
+  const addItem = async () => {
+    console.log("combo", combo);
+    setIsLoading(true);
+    const res = await addComboCartApi(combo.id, 1);
+    console.log("thêm sản phẩm thành công ", res);
+    fetchCart();
+    toast.success("Thêm sản phẩm vào giỏ hàng thành công");
+    setIsLoading(false);
+  };
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <div>
-        <Link to="/">back</Link>
+      <div className="mb-4">
+        <Link to="/">
+          <ArrowLeftOutlined /> Trở lại{" "}
+        </Link>
       </div>
       <div className="grid md:grid-cols-2 gap-8 items-stretch">
         {/* Cột trái - Ảnh combo */}
@@ -99,12 +129,21 @@ export const DetailCombo = () => {
 
           {/* Nút đặt hàng luôn ở dưới */}
           <div className="mt-4 flex-shrink-0">
-            <button
-              onClick={() => alert("Thêm vào giỏ hàng")}
-              className="w-full px-8 py-4 text-lg font-bold bg-red-600 text-white rounded-full hover:bg-red-700 shadow-xl transition"
+            <Button
+              onClick={addItem}
+              style={{
+                backgroundColor: "rgb(200 16 46)",
+                color: "white",
+                border: "none",
+                fontSize: "16px",
+                height: "50px",
+                width: "100%",
+                borderRadius: "10px",
+              }}
+              loading={isLoading}
             >
               🛒 Đặt hàng ngay
-            </button>
+            </Button>
           </div>
         </div>
       </div>
