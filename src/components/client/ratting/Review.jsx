@@ -88,9 +88,6 @@ export const ModelReviewProduct = ({ product, onClose }) => {
             <p className="text-sm text-gray-500 line-clamp-2">
               {product.description}
             </p>
-            <p className="text-red-600 font-bold mt-1">
-              {product.product_variants[0].price.toLocaleString()}₫
-            </p>
           </div>
         </div>
 

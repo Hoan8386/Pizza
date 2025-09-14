@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ModelReviewProduct } from "../ratting/Review";
 
 export const CombosListItem = ({ combos }) => {
+  // const [selectedProduct, setSelectedProduct] = useState(null);
+  const [reviewProduct, setReviewProduct] = useState(null);
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
       {combos.map((combo) => (
@@ -33,9 +37,26 @@ export const CombosListItem = ({ combos }) => {
             <p className="mt-1 text-sm text-gray-600 line-clamp-2">
               {combo.description}
             </p>
+
+            <div
+              className="mt-3 text-red-700 hover:text-red-600"
+              onClick={(e) => {
+                e.preventDefault(); // ❌ Ngăn Link redirect
+                e.stopPropagation(); // ❌ Ngăn lan sự kiện
+                setReviewProduct(combo);
+              }}
+            >
+              Xem đánh giá
+            </div>
           </div>
         </Link>
       ))}
+      {reviewProduct && (
+        <ModelReviewProduct
+          product={reviewProduct}
+          onClose={() => setReviewProduct(null)}
+        />
+      )}
     </div>
   );
 };
