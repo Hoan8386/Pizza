@@ -28,7 +28,14 @@ export const LoginPage = () => {
       localStorage.setItem("access_token", token);
       setUser(user);
       toast.success("Đăng nhập thành công");
-      navigate("/");
+      // ✅ Điều hướng theo role
+      const role = user.role;
+      console.log("check role", role);
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } else {
       toast.error(res.message);
       console.log("check log", res);

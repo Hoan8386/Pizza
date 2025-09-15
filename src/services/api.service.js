@@ -198,6 +198,11 @@ const reviewProductApi  = (product_id,rating,comment) =>{
     }
     return axios.post(URL_BACKEND, data)
 }
+
+const getAllBannerApi =() =>{
+    const URL_BACKEND = "/api/banners";
+     return axios.get(URL_BACKEND);
+}
 export {
     getAllProducts,
     getAllCategories,
@@ -223,5 +228,6 @@ export {
     searchProduct,
     getAllOrder,
     getReviewProductApi,
-    reviewProductApi
+    reviewProductApi,
+    getAllBannerApi
 };

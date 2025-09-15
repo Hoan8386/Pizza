@@ -1,32 +1,33 @@
 import { ArrowDownOutlined } from "@ant-design/icons";
 import { Carousel } from "antd";
-import banner1 from "../../../assets/banner/1.webp";
-import banner2 from "../../../assets/banner/2.webp";
-import banner3 from "../../../assets/banner/3.webp";
-import banner4 from "../../../assets/banner/4.webp";
-import banner5 from "../../../assets/banner/5.webp";
-import banner6 from "../../../assets/banner/6.webp";
-import banner7 from "../../../assets/banner/7.webp";
+import { useEffect, useState } from "react";
+import { getAllBannerApi } from "../../../services/api.service";
 
 export const Banner = () => {
-  const images = [
-    banner1,
-    banner2,
-    banner3,
-    banner4,
-    banner5,
-    banner6,
-    banner7,
-  ];
+  const [banners, setBanners] = useState([]);
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const res = await getAllBannerApi();
+        console.log("check banner", res.data);
+        setBanners(res.data);
+      } catch (error) {
+        console.error("Lỗi khi gọi API getAllBannerApi:", error);
+        setBanners([]);
+      }
+    };
+    fetch();
+  }, []);
 
   return (
     <>
       <div style={{ borderRadius: "30px", overflow: "hidden" }}>
         <Carousel autoplay arrows="true">
-          {images.map((img, index) => (
+          {banners.map((item, index) => (
             <div key={index}>
+              {console.log(`http://localhost:8000/images${item.image_url}`)}
               <img
-                src={img}
+                src={`http://localhost:8000/images${item.image_url}`}
                 alt={`Banner ${index + 1}`}
                 style={{
                   width: "100%",

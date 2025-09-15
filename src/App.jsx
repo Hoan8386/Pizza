@@ -16,6 +16,8 @@ import { CheckOut } from "./components/client/checkout/CheckOut";
 import ForgotPassword from "./components/client/forgot/ForgotPassword";
 import { DetailCombo } from "./components/client/combos/Detail.page";
 import { OrderPage } from "./pages/Order.page";
+import IndexPage from "./pages/admin/Index.page";
+import ProtectedRoute from "./share/ProtectedRoute";
 
 const LayoutClient = () => {
   const { isAppLoading } = useContext(AuthContext);
@@ -38,6 +40,32 @@ const LayoutClient = () => {
             <Header />
             <Outlet />
             <Footer />
+          </div>
+        </>
+      )}
+    </>
+  );
+};
+
+const LayoutAdmin = () => {
+  const { isAppLoading } = useContext(AuthContext);
+  return (
+    <>
+      {isAppLoading === true ? (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50% , -50%)",
+          }}
+        >
+          <Spin />
+        </div>
+      ) : (
+        <>
+          <div className="w-[1170px]  mx-auto">
+            <Outlet />
           </div>
         </>
       )}
@@ -72,6 +100,24 @@ function App() {
     { path: "/login", element: <LoginPage /> },
     { path: "/register", element: <RegisterPage /> },
     { path: "/forgot", element: <ForgotPassword /> },
+
+    {
+      path: "/admin",
+      element: (
+        <LayoutApp>
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <LayoutAdmin />
+          </ProtectedRoute>
+        </LayoutApp>
+      ),
+      children: [
+        { index: true, element: <IndexPage /> },
+        // { path: "dish", element: <TableDish /> },
+        // { path: "info", element: <InfoPageAdmin /> },
+        // { path: "order", element: <OrderPageAdmin /> },
+        // { path: "user", element: <UserPageAdmin /> },
+      ],
+    },
     // { path: "/unauthorized", element: <Unauthorized /> },
   ]);
 
