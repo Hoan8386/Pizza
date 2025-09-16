@@ -32,8 +32,8 @@ const Navbar = () => {
     console.log(res);
     if (res.data.success === true) {
       toast.success(res.message);
-      setUser([]);
-      setCart([]);
+      setUser(null);
+      setCart(null);
       localStorage.removeItem("token");
       navigate("/");
     } else {

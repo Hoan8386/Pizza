@@ -171,18 +171,22 @@ export const CartPage = () => {
                     {/* Nếu là product thì có size + crust */}
                     {item.type === "product" && (
                       <>
-                        <p
-                          className="text-gray-500"
-                          style={{ fontSize: "16px" }}
-                        >
-                          Cỡ: {item.variant_info.size}
-                        </p>
-                        <p
-                          className="text-gray-500"
-                          style={{ fontSize: "16px" }}
-                        >
-                          Đế: {item.variant_info.crust}
-                        </p>
+                        {item.variant_info?.size && (
+                          <p
+                            className="text-gray-500"
+                            style={{ fontSize: "16px" }}
+                          >
+                            Cỡ: {item.variant_info.size}
+                          </p>
+                        )}
+                        {item.variant_info?.crust && (
+                          <p
+                            className="text-gray-500"
+                            style={{ fontSize: "16px" }}
+                          >
+                            Đế: {item.variant_info.crust}
+                          </p>
+                        )}
                       </>
                     )}
                   </div>
