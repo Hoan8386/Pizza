@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Modal, Rate, Spin, Input, Button } from "antd";
 import {
   getReviewProductApi,
   reviewProductApi,
 } from "../../../services/api.service";
 import { toast } from "react-toastify";
+import { AuthContext } from "../../context/auth.context";
 
 export const ModelReviewProduct = ({ product, onClose }) => {
+  const { user } = useContext(AuthContext);
+
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rating, setRating] = useState(0);
@@ -35,26 +38,30 @@ export const ModelReviewProduct = ({ product, onClose }) => {
   }, [product]);
 
   const handleSubmit = async () => {
-    if (!rating || !comment.trim()) {
-      toast.warning("Vui lòng nhập đầy đủ đánh giá!");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const res = await reviewProductApi(product.id, rating, comment);
-
-      if (res.error) {
-        toast.error(res.error);
-      } else {
-        toast.success("Đánh giá thành công");
-        setRating(0);
-        setComment("");
-        fetchReview();
+    if (user.id != null) {
+      if (!rating || !comment.trim()) {
+        toast.warning("Vui lòng nhập đầy đủ đánh giá!");
+        return;
       }
-    } catch (err) {
-      toast.error("Có lỗi xảy ra, vui lòng thử lại!", err);
-    } finally {
-      setSubmitting(false);
+      setSubmitting(true);
+      try {
+        const res = await reviewProductApi(product.id, rating, comment);
+
+        if (res.error) {
+          toast.error(res.error);
+        } else {
+          toast.success("Đánh giá thành công");
+          setRating(0);
+          setComment("");
+          fetchReview();
+        }
+      } catch (err) {
+        toast.error("Có lỗi xảy ra, vui lòng thử lại!", err);
+      } finally {
+        setSubmitting(false);
+      }
+    } else {
+      toast.error("Bạn phải đăng nhâp để đánh giá ");
     }
   };
 
