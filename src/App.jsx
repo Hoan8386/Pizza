@@ -17,6 +17,9 @@ import ForgotPassword from "./components/client/forgot/ForgotPassword";
 import { DetailCombo } from "./components/client/combos/Detail.page";
 import { OrderPage } from "./pages/Order.page";
 import IndexPage from "./pages/admin/Index.page";
+import ProductAdmin from "./pages/admin/ProductAdmin";
+import OrderAdmin from "./pages/admin/OrderAdmin";
+import CatalogAdmin from "./pages/admin/CatalogAdmin";
 import ProtectedRoute from "./share/ProtectedRoute";
 
 const LayoutClient = () => {
@@ -112,6 +115,10 @@ function App() {
       ),
       children: [
         { index: true, element: <IndexPage /> },
+        { path: "categories", element: <CatalogAdmin /> },
+        { path: "products", element: <ProductAdmin /> },
+        { path: "orders", element: <OrderAdmin /> },
+        { path: "catalogs", element: <CatalogAdmin /> },
         // { path: "dish", element: <TableDish /> },
         // { path: "info", element: <InfoPageAdmin /> },
         // { path: "order", element: <OrderPageAdmin /> },
