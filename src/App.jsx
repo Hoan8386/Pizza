@@ -20,6 +20,8 @@ import IndexPage from "./pages/admin/Index.page";
 import ProductAdmin from "./pages/admin/ProductAdmin";
 import OrderAdmin from "./pages/admin/OrderAdmin";
 import CatalogAdmin from "./pages/admin/CatalogAdmin";
+import CustomerAdmin from "./pages/admin/CustomerAdmin";
+import ContentAdmin from "./pages/admin/ContentAdmin";
 import ProtectedRoute from "./share/ProtectedRoute";
 
 const LayoutClient = () => {
@@ -118,7 +120,11 @@ function App() {
         { path: "categories", element: <CatalogAdmin /> },
         { path: "products", element: <ProductAdmin /> },
         { path: "orders", element: <OrderAdmin /> },
+        { path: "customers", element: <CustomerAdmin /> },
+        { path: "content", element: <ContentAdmin /> },
         { path: "catalogs", element: <CatalogAdmin /> },
+        
+
         // { path: "dish", element: <TableDish /> },
         // { path: "info", element: <InfoPageAdmin /> },
         // { path: "order", element: <OrderPageAdmin /> },

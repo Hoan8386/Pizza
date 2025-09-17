@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, DatePicker, Divider, Input, Modal, Select, Space, Table, Tag, Typography, message } from "antd";
+import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import {
   getOrdersApi,
@@ -146,6 +147,9 @@ const OrderAdmin = () => {
 
   return (
     <div style={{ padding: 16 }}>
+      <div style={{ marginBottom: 8 }}>
+        <Link to="/admin"><Button>← Quay lại Dashboard</Button></Link>
+      </div>
       <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12 }}>
         Quản lý đơn hàng
       </Typography.Title>

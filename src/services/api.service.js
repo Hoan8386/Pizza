@@ -246,6 +246,12 @@ const getMonthlyRevenueApi = (params = {}) => {
     return axios.get('/api/revenue/monthly', { params });
 }
 
+// Users (for CustomerAdmin & admin management)
+const getUsersApi = (params = {}) => axios.get('/api/users', { params });
+const createUserByAdminApi = (payload) => axios.post('/api/users', payload);
+const updateUserByAdminApi = (id, payload) => axios.put(`/api/users/${id}`, payload);
+const deleteUserApi = (id) => axios.delete(`/api/users/${id}`);
+
 
 const getReviewProductApi = (product_id) =>{
     
@@ -269,6 +275,17 @@ const getAllBannerApi =() =>{
     const URL_BACKEND = "/api/banners";
      return axios.get(URL_BACKEND);
 }
+
+// Banner CRUD
+const createBannerApi = (payload) => axios.post('/api/banners', payload);
+const updateBannerApi = (id, payload) => axios.put(`/api/banners/${id}`, payload);
+const deleteBannerApi = (id) => axios.delete(`/api/banners/${id}`);
+
+// News CRUD
+const getNewsApi = (params = {}) => axios.get('/api/news', { params });
+const createNewsApi = (payload) => axios.post('/api/news', payload);
+const updateNewsApi = (id, payload) => axios.put(`/api/news/${id}`, payload);
+const deleteNewsApi = (id) => axios.delete(`/api/news/${id}`);
 export {
     getAllProducts,
     createProductApi,
@@ -278,6 +295,10 @@ export {
     createCategoryApi,
     updateCategoryApi,
     deleteCategoryApi,
+    getUsersApi,
+    createUserByAdminApi,
+    updateUserByAdminApi,
+    deleteUserApi,
     getAllSizes,
     getAllCrusts,
     getProductsByCategory,
@@ -308,5 +329,12 @@ export {
     getMonthlyRevenueApi,
     getReviewProductApi,
     reviewProductApi,
-    getAllBannerApi
+    getAllBannerApi,
+    createBannerApi,
+    updateBannerApi,
+    deleteBannerApi,
+    getNewsApi,
+    createNewsApi,
+    updateNewsApi,
+    deleteNewsApi
 };

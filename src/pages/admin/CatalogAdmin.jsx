@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Divider, Form, Input, Modal, Popconfirm, Space, Table, Tag, Typography, message } from "antd";
+import { Link } from "react-router-dom";
 import { getAllCategories, createCategoryApi, updateCategoryApi, deleteCategoryApi } from "../../services/api.service";
 
 const CatalogAdmin = () => {
@@ -117,6 +118,9 @@ const CatalogAdmin = () => {
 
   return (
     <div style={{ padding: 16 }}>
+      <div style={{ marginBottom: 8 }}>
+        <Link to="/admin"><Button>← Quay lại Dashboard</Button></Link>
+      </div>
       <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12 }}>Quản lý danh mục</Typography.Title>
       <Card>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 12 }}>
