@@ -7,9 +7,52 @@ const getAllProducts = () => {
     return axios.get(URL_BACKEND);
 };
 
+// Tạo sản phẩm mới
+const createProductApi = (productPayload) => {
+    const URL_BACKEND = "/api/products";
+    return axios.post(URL_BACKEND, productPayload);
+};
+
+// Cập nhật sản phẩm (không bao gồm variants)
+const updateProductApi = (id, productPayload) => {
+    const URL_BACKEND = `/api/products/${id}`;
+    return axios.put(URL_BACKEND, productPayload);
+};
+
+// Xóa sản phẩm
+const deleteProductApi = (id) => {
+    const URL_BACKEND = `/api/products/${id}`;
+    return axios.delete(URL_BACKEND);
+};
+
 // Lấy tất cả danh mục
 const getAllCategories = () => {
     const URL_BACKEND = "api/categories";
+    return axios.get(URL_BACKEND);
+};
+
+// Category CRUD
+const createCategoryApi = (payload) => {
+    return axios.post('/api/categories', payload);
+}
+
+const updateCategoryApi = (id, payload) => {
+    return axios.put(`/api/categories/${id}`, payload);
+}
+
+const deleteCategoryApi = (id) => {
+    return axios.delete(`/api/categories/${id}`);
+}
+
+// Lấy tất cả kích cỡ
+const getAllSizes = () => {
+    const URL_BACKEND = "/api/sizes";
+    return axios.get(URL_BACKEND);
+};
+
+// Lấy tất cả đế bánh
+const getAllCrusts = () => {
+    const URL_BACKEND = "/api/crusts";
     return axios.get(URL_BACKEND);
 };
 
@@ -180,6 +223,29 @@ const getAllOrder =  () =>{
       return axios.get(URL_BACKEND);
 }
 
+// Order APIs for admin management
+const getOrdersApi = (params = {}) => {
+    // expects admin token; backend filters non-admin to own orders
+    return axios.get('/api/orders', { params });
+}
+
+const updateOrderStatusApi = (orderId, status) => {
+    return axios.patch(`/api/orders/${orderId}/status`, { status });
+}
+
+const cancelOrderApi = (orderId) => {
+    return axios.post(`/api/orders/${orderId}/cancel`);
+}
+
+// Dashboard/Revenue
+const getDashboardStatsApi = (params = {}) => {
+    return axios.get('/api/revenue/dashboard', { params });
+}
+
+const getMonthlyRevenueApi = (params = {}) => {
+    return axios.get('/api/revenue/monthly', { params });
+}
+
 
 const getReviewProductApi = (product_id) =>{
     
@@ -205,7 +271,15 @@ const getAllBannerApi =() =>{
 }
 export {
     getAllProducts,
+    createProductApi,
+    updateProductApi,
+    deleteProductApi,
     getAllCategories,
+    createCategoryApi,
+    updateCategoryApi,
+    deleteCategoryApi,
+    getAllSizes,
+    getAllCrusts,
     getProductsByCategory,
     createUserApi,
     loginApi,
@@ -227,6 +301,11 @@ export {
     getAllFaqs,
     searchProduct,
     getAllOrder,
+    getOrdersApi,
+    updateOrderStatusApi,
+    cancelOrderApi,
+    getDashboardStatsApi,
+    getMonthlyRevenueApi,
     getReviewProductApi,
     reviewProductApi,
     getAllBannerApi
