@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, DatePicker, Divider, Input, Modal, Select, Space, Table, Tag, Typography, message } from "antd";
 import { Link } from "react-router-dom";
+import emblem from "../../assets/Pizza-Hut-Emblem.png";
+
 import dayjs from "dayjs";
 import {
   getOrdersApi,
@@ -34,7 +36,6 @@ const OrderAdmin = () => {
       const params = {};
       if (status) params.status = status;
       if (userId) params.user_id = userId;
-      // dateRange not supported in API now; left for future
       const res = await getOrdersApi(params);
       const list = res.data || res || [];
       const filtered = keyword
@@ -100,6 +101,11 @@ const OrderAdmin = () => {
       dataIndex: "id",
       width: 80,
     },
+    (
+      { title: "Ngày tạo", dataIndex: "created_at", render: (v) => dayjs(v).format("HH:mm DD/MM/YYYY") }
+    ),
+
+
     {
       title: "Khách hàng",
       render: (_, r) => r?.user?.full_name || r?.user?.email || `User#${r.user_id}`,
@@ -116,11 +122,6 @@ const OrderAdmin = () => {
         const s = mapStatus(v);
         return <Tag color={s.color}>{s.label}</Tag>;
       },
-    },
-    {
-      title: "Ngày tạo",
-      dataIndex: "created_at",
-      render: (v) => (v ? dayjs(v).format("HH:mm DD/MM/YYYY") : "-"),
     },
     {
       title: "Thao tác",
@@ -146,13 +147,25 @@ const OrderAdmin = () => {
   ];
 
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ marginBottom: 8 }}>
-        <Link to="/admin"><Button>← Quay lại Dashboard</Button></Link>
+    <div>
+      <div>
+      <div style={{
+        background: "linear-gradient(90deg, rgba(217,48,37,0.95) 0%, rgba(217,48,37,0.85) 60%, rgba(217,48,37,0.75) 100%)",
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 12,
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+      }}>
+           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <img src={emblem} alt="Admin" style={{ height: 28 }} />
+          <div style={{ fontWeight: 700 }}>Quản lý đơn hàng</div>
+        </div>
+        <Link to="/admin" style={{ color: "#fff" }}>Dashboard</Link>
       </div>
-      <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12 }}>
-        Quản lý đơn hàng
-      </Typography.Title>
       <Card>
         <div style={{
           display: "flex",
@@ -178,7 +191,7 @@ const OrderAdmin = () => {
             onChange={setStatus}
           />
           <div style={{ flex: 1 }} />
-          <Button onClick={fetchOrders}>Tải lại</Button>
+          <Button onClick={fetchOrders} type="primary" style={{ background: "#d93025" }}>Tải lại</Button>
         </div>
         <Divider style={{ margin: "8px 0" }} />
         <Table
@@ -235,6 +248,7 @@ const OrderAdmin = () => {
           </div>
         )}
       </Modal>
+    </div>
     </div>
   );
 };
