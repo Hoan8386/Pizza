@@ -58,71 +58,64 @@ const IndexPage = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12 }}>
-        Bảng điều khiển
+      <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12, color: "#d93025" }}>
+        Admin Dashboard
       </Typography.Title>
 
       <Row gutter={[12, 12]}>
-        <Col xs={24} md={6}>
-          <Card title="Danh mục" bodyStyle={{ padding: 0 }}>
-            <Menu
-              mode="inline"
-              selectable={false}
-              items={[
-                { key: "dashboard", label: <Link to="/admin">Tổng quan</Link> },
-                { key: "products", label: <Link to="/admin/products">Sản phẩm</Link> },
-                { key: "orders", label: <Link to="/admin/orders">Đơn hàng</Link> },
-                { key: "catalogs", label: <Link to="/admin/catalogs">Danh mục</Link> },
-                { key: "customers", label: <Link to="/admin/customers">Khách hàng</Link> },
-                { key: "content", label: <Link to="/admin/content">Tin tức</Link> },
-              ]}
-            />
-          </Card>
-        </Col>
+       
         <Col xs={24} md={18}>
           <Row gutter={[12, 12]}>
             <Col xs={24} md={6}>
               <Card loading={loading} style={{ background: "linear-gradient(135deg,#e6f7ff,#ffffff)" }}>
-                <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
                     <div style={{ fontSize: 12, color: "#888" }}>Doanh thu</div>
                     <div style={{ fontSize: 22, fontWeight: 700 }}>{(Number(stats?.overview?.total_revenue||0)).toLocaleString()}₫</div>
                   </div>
-                  <BarChartOutlined style={{ fontSize: 28, color: "#1677ff" }} />
-                </Space>
+                  <div style={{ lineHeight: 0, display: "flex", alignItems: "center" }}>
+                    <BarChartOutlined style={{ fontSize: 28, color: "#1677ff" }} />
+                  </div>
+                </div>
               </Card>
             </Col>
             <Col xs={24} md={6}>
               <Card loading={loading} style={{ background: "linear-gradient(135deg,#fff1f0,#ffffff)" }}>
-                <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
                     <div style={{ fontSize: 12, color: "#888" }}>Tổng đơn</div>
                     <div style={{ fontSize: 22, fontWeight: 700 }}>{Number(stats?.overview?.total_orders||0)}</div>
                   </div>
-                  <ShoppingCartOutlined style={{ fontSize: 28, color: "#ff4d4f" }} />
-                </Space>
+                  <div style={{ lineHeight: 0, display: "flex", alignItems: "center" }}>
+                    <ShoppingCartOutlined style={{ fontSize: 28, color: "#ff4d4f" }} />
+                  </div>
+                </div>
               </Card>
             </Col>
             <Col xs={24} md={6}>
               <Card loading={loading} style={{ background: "linear-gradient(135deg,#f6ffed,#ffffff)" }}>
-                <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
                     <div style={{ fontSize: 12, color: "#888" }}>Khách hàng</div>
                     <div style={{ fontSize: 22, fontWeight: 700 }}>{Number(stats?.overview?.unique_customers||0)}</div>
                   </div>
-                  <TeamOutlined style={{ fontSize: 28, color: "#52c41a" }} />
-                </Space>
+                  <div style={{ lineHeight: 0, display: "flex", alignItems: "center" }}>
+                    <TeamOutlined style={{ fontSize: 28, color: "#52c41a" }} />
+                  </div>
+                </div>
               </Card>
             </Col>
             <Col xs={24} md={6}>
               <Card loading={loading} style={{ background: "linear-gradient(135deg,#fffbe6,#ffffff)" }}>
-                <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
                     <div style={{ fontSize: 12, color: "#888" }}>Giá trị TB</div>
                     <div style={{ fontSize: 22, fontWeight: 700 }}>{(Number(stats?.overview?.avg_order_value||0)).toLocaleString()}₫</div>
                   </div>
-                  <ProfileOutlined style={{ fontSize: 28, color: "#faad14" }} />
-                </Space>
+                  <div style={{ lineHeight: 0, display: "flex", alignItems: "center" }}>
+                    <ProfileOutlined style={{ fontSize: 28, color: "#faad14" }} />
+                  </div>
+                </div>
               </Card>
             </Col>
           </Row>
