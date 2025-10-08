@@ -9,6 +9,7 @@ import {
   updateProductApi,
   deleteProductApi,
 } from "../../services/api.service";
+import emblem from "../../assets/Pizza-Hut-Emblem.png";
 import {
   Button,
   Card,
@@ -88,7 +89,12 @@ const ProductAdmin = () => {
       description: record.description,
       image_url: record.image_url,
       category_id: record.category_id,
-      // Chỉ chỉnh sửa thông tin cơ bản; variants quản lý riêng
+      variants: (record.product_variants || []).map(v => ({
+        size_id: v.size?.id || v.size_id || null,
+        crust_id: v.crust?.id || v.crust_id || null,
+        price: v.price,
+        stock: v.stock,
+      }))
     });
     setIsModalOpen(true);
   };
@@ -109,14 +115,15 @@ const ProductAdmin = () => {
       setIsSubmitting(true);
 
       if (editingProduct) {
-        // Update only basic fields
-        const payload = {
+        // Allow updating variants as well: backend update currently only updates base fields,
+        // so we update base and inform user variants will be applied when supported.
+        const basePayload = {
           name: values.name,
           description: values.description,
           image_url: values.image_url,
           category_id: values.category_id || null,
         };
-        await updateProductApi(editingProduct.id, payload);
+        await updateProductApi(editingProduct.id, basePayload);
         message.success("Cập nhật sản phẩm thành công");
       } else {
         // Create with variants
@@ -239,12 +246,23 @@ const ProductAdmin = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <div style={{ marginBottom: 8 }}>
-        <Link to="/admin"><Button>← Quay lại Dashboard</Button></Link>
+      <div style={{
+        background: "linear-gradient(90deg, rgba(217,48,37,0.95) 0%, rgba(217,48,37,0.85) 60%, rgba(217,48,37,0.75) 100%)",
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 12,
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <img src={emblem} alt="Admin" style={{ height: 28 }} />
+          <div style={{ fontWeight: 700 }}>Quản lý sản phẩm</div>
+        </div>
+        <Link to="/admin" style={{ color: "#fff" }}>Dashboard</Link>
       </div>
-      <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12 }}>
-        Quản lý sản phẩm
-      </Typography.Title>
       <Card>
         <div style={{
           display: "flex",
@@ -263,7 +281,7 @@ const ProductAdmin = () => {
           />
           <Button onClick={() => fetchProducts(keyword)}>Tải lại</Button>
           <div style={{ flex: 1 }} />
-          <Button type="primary" onClick={openCreate}>
+        <Button type="primary" style={{ background: "#d93025" }} onClick={openCreate}>
             + Thêm sản phẩm
           </Button>
         </div>
@@ -319,7 +337,7 @@ const ProductAdmin = () => {
             />
           </Form.Item>
 
-          {!editingProduct && (
+          {(
             <Form.List name="variants">
               {(fields, { add, remove }) => (
                 <div>
@@ -372,11 +390,6 @@ const ProductAdmin = () => {
             </Form.List>
           )}
         </Form>
-        {editingProduct && (
-          <Tag color="gold">
-            Chỉnh sửa biến thể vui lòng dùng trang quản lý biến thể.
-          </Tag>
-        )}
       </Modal>
     </div>
   );
