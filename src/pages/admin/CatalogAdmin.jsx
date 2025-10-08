@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Divider, Form, Input, Modal, Popconfirm, Space, Table, Tag, Typography, message } from "antd";
 import { Link } from "react-router-dom";
 import { getAllCategories, createCategoryApi, updateCategoryApi, deleteCategoryApi } from "../../services/api.service";
+import emblem from "../../assets/Pizza-Hut-Emblem.png";
 
 const CatalogAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -118,10 +119,24 @@ const CatalogAdmin = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <div style={{ marginBottom: 8 }}>
-        <Link to="/admin"><Button>← Quay lại Dashboard</Button></Link>
+      <div style={{
+        background: "linear-gradient(90deg, rgba(217,48,37,0.95) 0%, rgba(217,48,37,0.85) 60%, rgba(217,48,37,0.75) 100%)",
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 12,
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <img src={emblem} alt="Admin" style={{ height: 28 }} />
+          <div style={{ fontWeight: 700 }}>Quản lý danh mục</div>
+        </div>
+        <Link to="/admin" style={{ color: "#fff" }}>Dashboard</Link>
       </div>
-      <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12 }}>Quản lý danh mục</Typography.Title>
+      
       <Card>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 12 }}>
           <Input.Search
@@ -134,7 +149,7 @@ const CatalogAdmin = () => {
           />
           <Button onClick={fetchData}>Tải lại</Button>
           <div style={{ flex: 1 }} />
-          <Button type="primary" onClick={openCreate}>+ Thêm danh mục</Button>
+          <Button type="primary" style={{ background: "#d93025" }} onClick={openCreate}>+ Thêm danh mục</Button>
         </div>
         <Divider style={{ margin: "8px 0" }} />
         <Table
