@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Button, Card, Divider, Form, Input, Modal, Popconfirm, Select, Space, Table, Tabs, Tag, Typography, message, Switch } from "antd";
 import { Link } from "react-router-dom";
+import emblem from "../../assets/Pizza-Hut-Emblem.png";
+
 import {
   getAllBannerApi,
   createBannerApi,
@@ -81,7 +83,7 @@ const BannerTab = () => {
         <Input.Search placeholder="Tìm theo link" allowClear value={keyword} onChange={(e)=>setKeyword(e.target.value)} onSearch={fetchData} style={{ width: 320 }} />
         <Button onClick={fetchData}>Tải lại</Button>
         <div style={{ flex: 1 }} />
-        <Button type="primary" onClick={openCreate}>+ Thêm banner</Button>
+        <Button type="primary" style={{ background: "#d93025" }} onClick={openCreate}>+ Thêm banner</Button>
       </div>
       <Divider style={{ margin: "8px 0" }} />
       <Table size="middle" rowKey={(r)=>r.id} loading={loading} columns={columns} dataSource={banners}
@@ -176,7 +178,7 @@ const NewsTab = () => {
         <Input.Search placeholder="Tìm theo tiêu đề" allowClear value={keyword} onChange={(e)=>setKeyword(e.target.value)} onSearch={fetchData} style={{ width: 320 }} />
         <Button onClick={fetchData}>Tải lại</Button>
         <div style={{ flex: 1 }} />
-        <Button type="primary" onClick={openCreate}>+ Thêm tin tức</Button>
+        <Button type="primary" style={{ background: "#d93025" }} onClick={openCreate}>+ Thêm tin tức</Button>
       </div>
       <Divider style={{ margin: "8px 0" }} />
       <Table size="middle" rowKey={(r)=>r.id} loading={loading} columns={columns} dataSource={items}
@@ -207,10 +209,23 @@ const NewsTab = () => {
 const ContentAdmin = () => {
   return (
     <div style={{ padding: 16 }}>
-      <div style={{ marginBottom: 8 }}>
-        <Link to="/admin"><Button>← Quay lại Dashboard</Button></Link>
+      <div style={{
+        background: "linear-gradient(90deg, rgba(217,48,37,0.95) 0%, rgba(217,48,37,0.85) 60%, rgba(217,48,37,0.75) 100%)",
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 12,
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+      }}>
+           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <img src={emblem} alt="Admin" style={{ height: 28 }} />
+          <div style={{ fontWeight: 700 }}>Quản lý nội dung</div>
+        </div>
+        <Link to="/admin" style={{ color: "#fff" }}>Dashboard</Link>
       </div>
-      <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12 }}>Quản lý nội dung</Typography.Title>
       <Tabs
         defaultActiveKey="banners"
         items={[
