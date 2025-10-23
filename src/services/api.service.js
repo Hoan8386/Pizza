@@ -7,9 +7,52 @@ const getAllProducts = () => {
     return axios.get(URL_BACKEND);
 };
 
+// Tạo sản phẩm mới
+const createProductApi = (productPayload) => {
+    const URL_BACKEND = "/api/products";
+    return axios.post(URL_BACKEND, productPayload);
+};
+
+// Cập nhật sản phẩm (không bao gồm variants)
+const updateProductApi = (id, productPayload) => {
+    const URL_BACKEND = `/api/products/${id}`;
+    return axios.put(URL_BACKEND, productPayload);
+};
+
+// Xóa sản phẩm
+const deleteProductApi = (id) => {
+    const URL_BACKEND = `/api/products/${id}`;
+    return axios.delete(URL_BACKEND);
+};
+
 // Lấy tất cả danh mục
 const getAllCategories = () => {
     const URL_BACKEND = "api/categories";
+    return axios.get(URL_BACKEND);
+};
+
+// Category CRUD
+const createCategoryApi = (payload) => {
+    return axios.post('/api/categories', payload);
+}
+
+const updateCategoryApi = (id, payload) => {
+    return axios.put(`/api/categories/${id}`, payload);
+}
+
+const deleteCategoryApi = (id) => {
+    return axios.delete(`/api/categories/${id}`);
+}
+
+// Lấy tất cả kích cỡ
+const getAllSizes = () => {
+    const URL_BACKEND = "/api/sizes";
+    return axios.get(URL_BACKEND);
+};
+
+// Lấy tất cả đế bánh
+const getAllCrusts = () => {
+    const URL_BACKEND = "/api/crusts";
     return axios.get(URL_BACKEND);
 };
 
@@ -180,6 +223,35 @@ const getAllOrder =  () =>{
       return axios.get(URL_BACKEND);
 }
 
+// Order APIs for admin management
+const getOrdersApi = (params = {}) => {
+    // expects admin token; backend filters non-admin to own orders
+    return axios.get('/api/orders', { params });
+}
+
+const updateOrderStatusApi = (orderId, status) => {
+    return axios.patch(`/api/orders/${orderId}/status`, { status });
+}
+
+const cancelOrderApi = (orderId) => {
+    return axios.post(`/api/orders/${orderId}/cancel`);
+}
+
+// Dashboard/Revenue
+const getDashboardStatsApi = (params = {}) => {
+    return axios.get('/api/revenue/dashboard', { params });
+}
+
+const getMonthlyRevenueApi = (params = {}) => {
+    return axios.get('/api/revenue/monthly', { params });
+}
+
+// Users (for CustomerAdmin & admin management)
+const getUsersApi = (params = {}) => axios.get('/api/users', { params });
+const createUserByAdminApi = (payload) => axios.post('/api/users', payload);
+const updateUserByAdminApi = (id, payload) => axios.put(`/api/users/${id}`, payload);
+const deleteUserApi = (id) => axios.delete(`/api/users/${id}`);
+
 
 const getReviewProductApi = (product_id) =>{
     
@@ -204,6 +276,15 @@ const getAllBannerApi =() =>{
      return axios.get(URL_BACKEND);
 }
 
+const createBannerApi = (payload) => axios.post('/api/banners', payload);
+const updateBannerApi = (id, payload) => axios.put(`/api/banners/${id}`, payload);
+const deleteBannerApi = (id) => axios.delete(`/api/banners/${id}`);
+
+// News CRUD
+const getNewsApi = (params = {}) => axios.get('/api/news', { params });
+const createNewsApi = (payload) => axios.post('/api/news', payload);
+const updateNewsApi = (id, payload) => axios.put(`/api/news/${id}`, payload);
+const deleteNewsApi = (id) => axios.delete(`/api/news/${id}`);
 const getAllNews =() =>{
     const URL_BACKEND = "/api/news";
      return axios.get(URL_BACKEND);
@@ -211,7 +292,19 @@ const getAllNews =() =>{
 
 export {
     getAllProducts,
+    createProductApi,
+    updateProductApi,
+    deleteProductApi,
     getAllCategories,
+    createCategoryApi,
+    updateCategoryApi,
+    deleteCategoryApi,
+    getUsersApi,
+    createUserByAdminApi,
+    updateUserByAdminApi,
+    deleteUserApi,
+    getAllSizes,
+    getAllCrusts,
     getProductsByCategory,
     createUserApi,
     loginApi,
@@ -233,8 +326,20 @@ export {
     getAllFaqs,
     searchProduct,
     getAllOrder,
+    getOrdersApi,
+    updateOrderStatusApi,
+    cancelOrderApi,
+    getDashboardStatsApi,
+    getMonthlyRevenueApi,
     getReviewProductApi,
     reviewProductApi,
     getAllBannerApi,
+    createBannerApi,
+    updateBannerApi,
+    deleteBannerApi,
+    getNewsApi,
+    createNewsApi,
+    updateNewsApi,
+    deleteNewsApi
     getAllNews
 };
