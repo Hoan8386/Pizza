@@ -24,9 +24,16 @@ export const CartPage = () => {
   const [couponCode, setCouponCode] = useState();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCart, setIsLoadingCart] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState({});
   const { setCart } = useContext(AuthContext);
 
+  const handleImageLoad = (itemId) => {
+    setImageLoaded((prev) => ({ ...prev, [itemId]: true }));
+  };
+
   const fetchData = async () => {
+    setIsLoadingCart(true);
     try {
       const res = await getCartApi();
       setProducts(res.data.items); // Adjust based on API response
@@ -40,11 +47,14 @@ export const CartPage = () => {
       });
     } catch (error) {
       console.error("Error fetching products:", error);
+    } finally {
+      setIsLoadingCart(false);
     }
   };
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRemoveFromCart = (id) => {
@@ -84,21 +94,45 @@ export const CartPage = () => {
   const checkCoupon = async () => {
     if (products.length === 0) {
       toast.warning("Không có sản phẩm nào");
-    } else {
-      setIsLoading(true);
+      return;
+    }
+
+    if (!coupon || coupon.trim() === "") {
+      toast.warning("Vui lòng nhập mã giảm giá");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
       const res = await getCoupon(coupon, totalPrice);
-      console.log(res.data);
-      if (res.data.valid === true) {
-        toast.success("Áp dụng mã giãm giá thành công");
+      console.log("check ", res);
+
+      // Kiểm tra status code 400 hoặc valid === false
+      if (res.statusCode === 400 || res.valid === false) {
+        toast.error("Áp dụng mã giảm giá thất bại");
+      } else if (res.data && res.data.valid === true) {
+        toast.success("Áp dụng mã giảm giá thành công");
         setTotalAfterDiscount(totalPrice - res.data.discount);
         setDiscount(res.data.discount);
         setCouponCode(res.data.coupon.code);
         console.log("check code ", res.data.coupon.code);
       } else {
-        toast.error("Áp dụng mã giãm giá thất bại");
+        toast.error("Áp dụng mã giảm giá thất bại");
       }
+    } catch (error) {
+      console.error("Error checking coupon:", error);
+      toast.error("Áp dụng mã giảm giá thất bại");
+    } finally {
       setIsLoading(false);
     }
+  };
+
+  const removeCoupon = () => {
+    setCouponCode(null);
+    setDiscount(0);
+    setTotalAfterDiscount("");
+    setCoupon("");
+    toast.success("Đã hủy mã giảm giá");
   };
 
   const checkout = () => {
@@ -140,91 +174,122 @@ export const CartPage = () => {
             Có {products.length} sản phẩm trong giỏ hàng của bạn
           </p>
 
-          <div>
-            {products.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center border border-gray-200 rounded-2xl p-4 mb-4 bg-white"
-              >
-                {/* Column 1: Image + Info */}
-                <div className="flex flex-1 items-center">
-                  <div className="w-[100px] h-[100px] flex-shrink-0 overflow-hidden rounded-xl">
-                    <img
-                      src={`http://localhost:8000/images${item.image_url}`}
-                      alt={
-                        item.type === "product"
+          {isLoadingCart ? (
+            <div className="flex flex-col gap-4 py-8">
+              {[1, 2, 3].map((skeleton) => (
+                <div
+                  key={skeleton}
+                  className="flex items-center border border-gray-200 rounded-2xl p-4 bg-white animate-pulse"
+                >
+                  <div className="w-[100px] h-[100px] bg-gray-300 rounded-xl"></div>
+                  <div className="ml-4 flex-1">
+                    <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-20 h-10 bg-gray-300 rounded"></div>
+                    <div className="w-24 h-10 bg-gray-300 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>
+              {products.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center border border-gray-200 rounded-2xl p-4 mb-4 bg-white"
+                >
+                  {/* Column 1: Image + Info */}
+                  <div className="flex flex-1 items-center">
+                    <div className="w-[100px] h-[100px] flex-shrink-0 overflow-hidden rounded-xl relative bg-gray-200">
+                      {!imageLoaded[item.id] && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-200 z-10">
+                          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-600"></div>
+                        </div>
+                      )}
+                      <img
+                        src={`http://localhost:8000/images${item.image_url}`}
+                        alt={
+                          item.type === "product"
+                            ? item.product_name
+                            : item.combo_name
+                        }
+                        onLoad={() => handleImageLoad(item.id)}
+                        className="w-full h-full object-cover scale-110"
+                        style={{
+                          opacity: imageLoaded[item.id] ? 1 : 0,
+                          transition: "opacity 0.3s ease-in-out",
+                        }}
+                      />
+                    </div>{" "}
+                    <div className="ml-4">
+                      {/* Tên hiển thị */}
+                      <h6 className="text-lg md:text-xl font-semibold text-gray-800 line-clamp-2">
+                        {item.type === "product"
                           ? item.product_name
-                          : item.combo_name
-                      }
-                      className="w-full h-full object-cover scale-110"
+                          : item.combo_name}
+                      </h6>
+
+                      {/* Nếu là product thì có size + crust */}
+                      {item.type === "product" && (
+                        <>
+                          {item.variant_info?.size && (
+                            <p
+                              className="text-gray-500"
+                              style={{ fontSize: "16px" }}
+                            >
+                              Cỡ: {item.variant_info.size}
+                            </p>
+                          )}
+                          {item.variant_info?.crust && (
+                            <p
+                              className="text-gray-500"
+                              style={{ fontSize: "16px" }}
+                            >
+                              Đế: {item.variant_info.crust}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Column 2: Quantity + Price + Remove */}
+                  <div className="flex-1 flex">
+                    <InputNumber
+                      style={{ width: "80px" }}
+                      disabled={isDisabled}
+                      min={1}
+                      value={item.quantity}
+                      onChange={(newQuantity) => {
+                        if (!newQuantity || newQuantity < 1) return;
+                        updateQuantity(item.id, newQuantity);
+                      }}
                     />
-                  </div>
 
-                  <div className="ml-4">
-                    {/* Tên hiển thị */}
-                    <h6 className="text-lg md:text-xl font-semibold text-gray-800 line-clamp-2">
-                      {item.type === "product"
-                        ? item.product_name
-                        : item.combo_name}
-                    </h6>
+                    {/* Price */}
+                    <div className="flex-3 text-right pr-2">
+                      <span className="text-lg font-semibold text-red-600">
+                        {item.subtotal.toLocaleString()}₫
+                      </span>
+                    </div>
 
-                    {/* Nếu là product thì có size + crust */}
-                    {item.type === "product" && (
-                      <>
-                        {item.variant_info?.size && (
-                          <p
-                            className="text-gray-500"
-                            style={{ fontSize: "16px" }}
-                          >
-                            Cỡ: {item.variant_info.size}
-                          </p>
-                        )}
-                        {item.variant_info?.crust && (
-                          <p
-                            className="text-gray-500"
-                            style={{ fontSize: "16px" }}
-                          >
-                            Đế: {item.variant_info.crust}
-                          </p>
-                        )}
-                      </>
-                    )}
+                    {/* Remove button */}
+                    <div className="flex-1 text-right">
+                      <button
+                        onClick={() => handleRemoveFromCart(item.id)}
+                        className="text-gray-400 hover:text-red-500 text-xl"
+                      >
+                        <CloseOutlined />
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                {/* Column 2: Quantity + Price + Remove */}
-                <div className="flex-1 flex">
-                  <InputNumber
-                    style={{ width: "80px" }}
-                    disabled={isDisabled}
-                    min={1}
-                    value={item.quantity}
-                    onChange={(newQuantity) => {
-                      if (!newQuantity || newQuantity < 1) return;
-                      updateQuantity(item.id, newQuantity);
-                    }}
-                  />
-
-                  {/* Price */}
-                  <div className="flex-3 text-right pr-2">
-                    <span className="text-lg font-semibold text-red-600">
-                      {item.subtotal.toLocaleString()}₫
-                    </span>
-                  </div>
-
-                  {/* Remove button */}
-                  <div className="flex-1 text-right">
-                    <button
-                      onClick={() => handleRemoveFromCart(item.id)}
-                      className="text-gray-400 hover:text-red-500 text-xl"
-                    >
-                      <CloseOutlined />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex-1  px-4 md:rounded-2xl">
           <div className="border border-gray-200 md:rounded-2xl md:p-6">
@@ -266,6 +331,26 @@ export const CartPage = () => {
                 </Button>
               </div>
             </div>
+
+            {/* Hiển thị mã đã áp dụng */}
+            {couponCode && (
+              <div className="mt-4 flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-green-600 font-medium">
+                    ✓ Mã: {couponCode}
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    (Giảm {discount?.toLocaleString()} ₫)
+                  </span>
+                </div>
+                <button
+                  onClick={removeCoupon}
+                  className="text-red-600 hover:text-red-700 font-medium text-xl"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="border border-gray-200 md:rounded-2xl md:p-6 mt-4">

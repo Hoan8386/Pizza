@@ -276,7 +276,6 @@ const getAllBannerApi =() =>{
      return axios.get(URL_BACKEND);
 }
 
-// Banner CRUD
 const createBannerApi = (payload) => axios.post('/api/banners', payload);
 const updateBannerApi = (id, payload) => axios.put(`/api/banners/${id}`, payload);
 const deleteBannerApi = (id) => axios.delete(`/api/banners/${id}`);
@@ -286,6 +285,11 @@ const getNewsApi = (params = {}) => axios.get('/api/news', { params });
 const createNewsApi = (payload) => axios.post('/api/news', payload);
 const updateNewsApi = (id, payload) => axios.put(`/api/news/${id}`, payload);
 const deleteNewsApi = (id) => axios.delete(`/api/news/${id}`);
+const getAllNews =() =>{
+    const URL_BACKEND = "/api/news";
+     return axios.get(URL_BACKEND);
+}
+
 export {
     getAllProducts,
     createProductApi,
@@ -337,4 +341,5 @@ export {
     createNewsApi,
     updateNewsApi,
     deleteNewsApi
+    getAllNews
 };

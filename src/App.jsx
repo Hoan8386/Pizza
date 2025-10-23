@@ -23,8 +23,12 @@ import CatalogAdmin from "./pages/admin/CatalogAdmin";
 import CustomerAdmin from "./pages/admin/CustomerAdmin";
 import ContentAdmin from "./pages/admin/ContentAdmin";
 import ProtectedRoute from "./share/ProtectedRoute";
+
 import emblem from "./assets/Pizza-Hut-Emblem.png";
 import adminBg from "./assets/PizzaHut.jpg";
+
+import NewsPage from "./pages/News.page";
+
 
 const LayoutClient = () => {
   const { isAppLoading } = useContext(AuthContext);
@@ -167,11 +171,12 @@ function App() {
       children: [
         // { index: true, element: <HomePage /> },
         { index: true, element: <HomePage></HomePage> },
-        { path: "/info", element: <InfoPage /> },
-        { path: "/cart", element: <CartPage /> },
-        { path: "/checkout", element: <CheckOut /> },
-        { path: "/combos/:id", element: <DetailCombo /> },
-        { path: "/order", element: <OrderPage /> },
+        { path: "info", element: <InfoPage /> },
+        { path: "cart", element: <CartPage /> },
+        { path: "checkout", element: <CheckOut /> },
+        { path: "combos/:id", element: <DetailCombo /> },
+        { path: "order", element: <OrderPage /> },
+        { path: "news", element: <NewsPage /> },
       ],
     },
 

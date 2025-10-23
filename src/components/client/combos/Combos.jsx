@@ -5,6 +5,12 @@ import { ModelReviewProduct } from "../ratting/Review";
 export const CombosListItem = ({ combos }) => {
   // const [selectedProduct, setSelectedProduct] = useState(null);
   const [reviewProduct, setReviewProduct] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState({});
+
+  const handleImageLoad = (comboId) => {
+    setImageLoaded((prev) => ({ ...prev, [comboId]: true }));
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
       {combos.map((combo) => (
@@ -16,10 +22,20 @@ export const CombosListItem = ({ combos }) => {
         >
           {/* Ảnh combo */}
           <div className="relative w-full h-70 bg-red-600 flex items-center justify-center overflow-hidden">
+            {!imageLoaded[combo.id] && (
+              <div className="absolute inset-0 flex items-center justify-center bg-red-600 z-10">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-white"></div>
+              </div>
+            )}
             <img
               src={`http://localhost:8000/images${combo.image_url}`}
               alt={combo.name}
+              onLoad={() => handleImageLoad(combo.id)}
               className="object-contain max-h-full max-w-full group-hover:scale-110 transform transition-transform duration-500"
+              style={{
+                opacity: imageLoaded[combo.id] ? 1 : 0,
+                transition: "opacity 0.4s ease-in-out",
+              }}
             />
           </div>
 
