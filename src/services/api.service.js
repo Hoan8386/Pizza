@@ -203,6 +203,12 @@ const getAllBannerApi =() =>{
     const URL_BACKEND = "/api/banners";
      return axios.get(URL_BACKEND);
 }
+
+const getAllNews =() =>{
+    const URL_BACKEND = "/api/news";
+     return axios.get(URL_BACKEND);
+}
+
 export {
     getAllProducts,
     getAllCategories,
@@ -229,5 +235,6 @@ export {
     getAllOrder,
     getReviewProductApi,
     reviewProductApi,
-    getAllBannerApi
+    getAllBannerApi,
+    getAllNews
 };

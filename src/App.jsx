@@ -86,11 +86,11 @@ function App() {
       children: [
         // { index: true, element: <HomePage /> },
         { index: true, element: <HomePage></HomePage> },
-        { path: "/info", element: <InfoPage /> },
-        { path: "/cart", element: <CartPage /> },
-        { path: "/checkout", element: <CheckOut /> },
-        { path: "/combos/:id", element: <DetailCombo /> },
-        { path: "/order", element: <OrderPage /> },
+        { path: "info", element: <InfoPage /> },
+        { path: "cart", element: <CartPage /> },
+        { path: "checkout", element: <CheckOut /> },
+        { path: "combos/:id", element: <DetailCombo /> },
+        { path: "order", element: <OrderPage /> },
       ],
     },
 

@@ -17,16 +17,20 @@ export const HomePage = () => {
   const [categories, setCategories] = useState([]);
   const [activeIndex, setActiveIndex] = useState(1);
   const [isCombos, setIsCombos] = useState(false);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   useEffect(() => {
     if (activeIndex === 10) {
       setIsCombos(true);
       const fetchCombos = async () => {
+        setIsLoadingProducts(true);
         try {
           const result = await getCombosApi();
           setCombos(result.data); // tùy API trả về
           console.log("combos", ...result.data);
         } catch (error) {
           console.error("Error fetching products:", error);
+        } finally {
+          setIsLoadingProducts(false);
         }
       };
       fetchCombos();
@@ -34,11 +38,14 @@ export const HomePage = () => {
       setIsCombos(false);
 
       const fetchData = async () => {
+        setIsLoadingProducts(true);
         try {
           const result = await getProductsByCategory(activeIndex);
           setProducts(result.data); // tùy API trả về
         } catch (error) {
           console.error("Error fetching products:", error);
+        } finally {
+          setIsLoadingProducts(false);
         }
       };
       fetchData();
@@ -68,7 +75,11 @@ export const HomePage = () => {
           activeIndex={activeIndex}
           setActiveIndex={setActiveIndex}
         />
-        {isCombos === true ? (
+        {isLoadingProducts ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-600"></div>
+          </div>
+        ) : isCombos === true ? (
           <CombosListItem combos={combos} />
         ) : (
           <ProductListItem products={products} />

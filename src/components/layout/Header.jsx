@@ -1,5 +1,4 @@
 import {
-  BellOutlined,
   ShoppingCartOutlined,
   UnorderedListOutlined,
   UserOutlined,
@@ -68,11 +67,6 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="flex-1  flex justify-end items-center gap-6">
-            <BellOutlined
-              style={{
-                fontSize: "1.5rem",
-              }}
-            />
             <Popover
               content={content}
               className="w-[28px] text-center text-red-600 font-bold"
