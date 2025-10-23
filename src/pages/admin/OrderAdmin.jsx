@@ -1,7 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, DatePicker, Divider, Input, Modal, Select, Space, Table, Tag, Typography, message } from "antd";
-import { Link } from "react-router-dom";
-import emblem from "../../assets/Pizza-Hut-Emblem.png";
+import {
+  Button,
+  Card,
+  DatePicker,
+  Divider,
+  Input,
+  Modal,
+  Select,
+  Space,
+  Table,
+  Tag,
+  Typography,
+  message,
+} from "antd";
+import { AdminPageHeader } from "../../components/admin/PageHeader";
+import { ShoppingCartOutlined } from "@ant-design/icons";
 
 import dayjs from "dayjs";
 import {
@@ -18,7 +31,8 @@ const statusOptions = [
   { label: "Đã huỷ", value: "cancelled", color: "red" },
 ];
 
-const mapStatus = (value) => statusOptions.find((s) => s.value === value) || statusOptions[0];
+const mapStatus = (value) =>
+  statusOptions.find((s) => s.value === value) || statusOptions[0];
 
 const OrderAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -39,10 +53,12 @@ const OrderAdmin = () => {
       const res = await getOrdersApi(params);
       const list = res.data || res || [];
       const filtered = keyword
-        ? list.filter((o) =>
-            String(o?.user?.full_name || o?.user?.email || "")
-              .toLowerCase()
-              .includes(keyword.toLowerCase()) || String(o?.id).includes(keyword)
+        ? list.filter(
+            (o) =>
+              String(o?.user?.full_name || o?.user?.email || "")
+                .toLowerCase()
+                .includes(keyword.toLowerCase()) ||
+              String(o?.id).includes(keyword)
           )
         : list;
       setOrders(filtered);
@@ -94,26 +110,28 @@ const OrderAdmin = () => {
     {
       title: "STT",
       width: 70,
-      render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+      render: (_, __, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
     },
     {
       title: "Mã",
       dataIndex: "id",
       width: 80,
     },
-    (
-      { title: "Ngày tạo", dataIndex: "created_at", render: (v) => dayjs(v).format("HH:mm DD/MM/YYYY") }
-    ),
-
-
+    {
+      title: "Ngày tạo",
+      dataIndex: "created_at",
+      render: (v) => dayjs(v).format("HH:mm DD/MM/YYYY"),
+    },
     {
       title: "Khách hàng",
-      render: (_, r) => r?.user?.full_name || r?.user?.email || `User#${r.user_id}`,
+      render: (_, r) =>
+        r?.user?.full_name || r?.user?.email || `User#${r.user_id}`,
     },
     {
       title: "Tổng tiền",
       dataIndex: "total_amount",
-      render: (v) => (Number(v || 0)).toLocaleString() + "₫",
+      render: (v) => Number(v || 0).toLocaleString() + "₫",
     },
     {
       title: "Trạng thái",
@@ -124,131 +142,389 @@ const OrderAdmin = () => {
       },
     },
     {
-      title: "Thao tác",
+      title: "Chi tiết",
+      render: (_, r) => (
+        <Button size="small" onClick={() => setDetail(r)}>
+          Xem
+        </Button>
+      ),
+      width: 100,
+    },
+    {
+      title: "Cập nhật trạng thái",
       render: (_, r) => {
         const nexts = nextStatusOptions(r.status);
         return (
-          <Space>
-            <Button size="small" onClick={() => setDetail(r)}>Chi tiết</Button>
-            {nexts.map((ns) => (
-              <Button key={ns} size="small" onClick={() => setStatusAction(r, ns)}>
-                {mapStatus(ns).label}
-              </Button>
-            ))}
-            {r.status !== "cancelled" && r.status !== "delivered" && (
-              <Button size="small" danger onClick={() => cancelOrder(r)}>
-                Huỷ
-              </Button>
-            )}
-          </Space>
+          <Select
+            size="small"
+            placeholder="Chọn trạng thái"
+            style={{ width: 150 }}
+            options={nexts.map((ns) => ({
+              label: mapStatus(ns).label,
+              value: ns,
+            }))}
+            onChange={(newStatus) => setStatusAction(r, newStatus)}
+          />
         );
       },
+      width: 180,
     },
   ];
 
   return (
-    <div>
-      <div>
-      <div style={{
-        background: "linear-gradient(90deg, rgba(217,48,37,0.95) 0%, rgba(217,48,37,0.85) 60%, rgba(217,48,37,0.75) 100%)",
-        borderRadius: 10,
-        padding: 12,
-        marginBottom: 12,
-        color: "#fff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
-      }}>
-           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src={emblem} alt="Admin" style={{ height: 28 }} />
-          <div style={{ fontWeight: 700 }}>Quản lý đơn hàng</div>
-        </div>
-        <Link to="/admin" style={{ color: "#fff" }}>Dashboard</Link>
-      </div>
-      <Card>
-        <div style={{
-          display: "flex",
-          gap: 8,
-          alignItems: "center",
-          flexWrap: "wrap",
-          marginBottom: 12,
-        }}>
-          <Input.Search
-            placeholder="Tìm theo mã đơn/khách hàng"
-            allowClear
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onSearch={fetchOrders}
-            style={{ width: 320 }}
-          />
-          <Select
-            allowClear
-            placeholder="Lọc trạng thái"
-            style={{ width: 200 }}
-            options={statusOptions.map((s) => ({ label: s.label, value: s.value }))}
-            value={status}
-            onChange={setStatus}
-          />
-          <div style={{ flex: 1 }} />
-          <Button onClick={fetchOrders} type="primary" style={{ background: "#d93025" }}>Tải lại</Button>
-        </div>
-        <Divider style={{ margin: "8px 0" }} />
-        <Table
-          size="middle"
-          rowKey={(r) => r.id}
-          loading={loading}
-          columns={columns}
-          dataSource={orders}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            showSizeChanger: false,
-            showTotal: (t) => `${t} đơn hàng`,
-          }}
-          onChange={(pg) => setPagination({ current: pg.current, pageSize: pg.pageSize })}
+    <div className="p-4">
+      <div className="space-y-4">
+        <AdminPageHeader
+          icon={<ShoppingCartOutlined style={{ color: "#c8102e" }} />}
+          title="Quản lý Đơn hàng"
+          description="Quản lý tất cả đơn hàng"
+          color="#c8102e"
+          image="📦"
         />
-      </Card>
+        <div className="p-6 space-y-6">
+          <Card style={{ borderRadius: "12px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                flexWrap: "wrap",
+                marginBottom: 12,
+              }}
+            >
+              <Input.Search
+                placeholder="Tìm theo mã đơn/khách hàng"
+                allowClear
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onSearch={fetchOrders}
+                style={{ width: 320 }}
+              />
+              <Select
+                allowClear
+                placeholder="Lọc trạng thái"
+                style={{ width: 200 }}
+                options={statusOptions.map((s) => ({
+                  label: s.label,
+                  value: s.value,
+                }))}
+                value={status}
+                onChange={setStatus}
+              />
+              <div style={{ flex: 1 }} />
+              <Button
+                onClick={fetchOrders}
+                type="primary"
+                style={{ background: "#d93025" }}
+              >
+                Tải lại
+              </Button>
+            </div>
+            <Divider style={{ margin: "8px 0" }} />
+            <Table
+              size="middle"
+              rowKey={(r) => r.id}
+              loading={loading}
+              columns={columns}
+              dataSource={orders}
+              pagination={{
+                current: pagination.current,
+                pageSize: pagination.pageSize,
+                showSizeChanger: false,
+                showTotal: (t) => `${t} đơn hàng`,
+              }}
+              onChange={(pg) =>
+                setPagination({ current: pg.current, pageSize: pg.pageSize })
+              }
+            />
+          </Card>
 
-      <Modal
-        title={`Đơn hàng #${detail?.id || ""}`}
-        open={!!detail}
-        onCancel={() => setDetail(null)}
-        footer={<Button onClick={() => setDetail(null)}>Đóng</Button>}
-        width={800}
-      >
-        {detail && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div>
-              <div><b>Khách hàng:</b> {detail?.user?.full_name || detail?.user?.email}</div>
-              <div><b>Trạng thái:</b> {mapStatus(detail.status).label}</div>
-              <div><b>Tổng tiền:</b> {(Number(detail.total_amount||0)).toLocaleString()}₫</div>
-              <div><b>Thời gian:</b> {dayjs(detail.created_at).format("HH:mm DD/MM/YYYY")}</div>
-            </div>
-            <div>
-              <div><b>Mã giảm giá:</b> {detail?.coupon?.code || "-"}</div>
-              <div><b>Ghi chú:</b> {detail?.note || "-"}</div>
-            </div>
-            <div style={{ gridColumn: "1 / -1", marginTop: 8 }}>
-              <b>Danh sách sản phẩm</b>
-              <div style={{ marginTop: 8 }}>
-                {(detail.items || []).map((it) => (
-                  <div key={it.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #f0f0f0" }}>
-                    <div>
-                      {it.product_variant_id
-                        ? `${it.product_variant?.product?.name || "Sản phẩm"}`
-                        : `${it.combo?.name || "Combo"}`}
+          <Modal
+            title={`Đơn hàng #${detail?.id || ""}`}
+            open={!!detail}
+            onCancel={() => setDetail(null)}
+            footer={<Button onClick={() => setDetail(null)}>Đóng</Button>}
+            width={900}
+          >
+            {detail && (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 24 }}
+              >
+                {/* Header - Thông tin chính */}
+                <div
+                  style={{
+                    background: "#f5f5f5",
+                    padding: 16,
+                    borderRadius: 8,
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr 1fr",
+                    gap: 20,
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{ fontSize: 12, color: "#999", marginBottom: 4 }}
+                    >
+                      Khách hàng
                     </div>
-                    <div>x{it.quantity}</div>
-                    <div>{Number(it.price||0).toLocaleString()}₫</div>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>
+                      {detail?.user?.full_name || detail?.user?.email || "-"}
+                    </div>
                   </div>
-                ))}
+                  <div>
+                    <div
+                      style={{ fontSize: 12, color: "#999", marginBottom: 4 }}
+                    >
+                      Trạng thái
+                    </div>
+                    <Tag
+                      color={mapStatus(detail.status).color}
+                      style={{ fontSize: 12 }}
+                    >
+                      {mapStatus(detail.status).label}
+                    </Tag>
+                  </div>
+                  <div>
+                    <div
+                      style={{ fontSize: 12, color: "#999", marginBottom: 4 }}
+                    >
+                      Thời gian tạo
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>
+                      {dayjs(detail.created_at).format("HH:mm DD/MM/YYYY")}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Thông tin giao hàng */}
+                <div>
+                  <h3
+                    style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}
+                  >
+                    📍 Thông tin giao hàng
+                  </h3>
+                  <div
+                    style={{
+                      background: "#fafafa",
+                      padding: 12,
+                      borderRadius: 8,
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 16,
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{ fontSize: 12, color: "#666", marginBottom: 4 }}
+                      >
+                        Tên người nhận
+                      </div>
+                      <div>{detail?.shipping_name || "-"}</div>
+                    </div>
+                    <div>
+                      <div
+                        style={{ fontSize: 12, color: "#666", marginBottom: 4 }}
+                      >
+                        Số điện thoại
+                      </div>
+                      <div>{detail?.shipping_phone || "-"}</div>
+                    </div>
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <div
+                        style={{ fontSize: 12, color: "#666", marginBottom: 4 }}
+                      >
+                        Địa chỉ
+                      </div>
+                      <div>{detail?.shipping_address || "-"}</div>
+                    </div>
+                    {detail?.note && (
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "#666",
+                            marginBottom: 4,
+                          }}
+                        >
+                          Ghi chú
+                        </div>
+                        <div style={{ fontStyle: "italic", color: "#666" }}>
+                          {detail.note}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Danh sách sản phẩm */}
+                <div>
+                  <h3
+                    style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}
+                  >
+                    🛒 Danh sách sản phẩm ({detail.items?.length || 0})
+                  </h3>
+                  <div
+                    style={{
+                      border: "1px solid #f0f0f0",
+                      borderRadius: 8,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "#fafafa",
+                        padding: "12px 16px",
+                        display: "grid",
+                        gridTemplateColumns: "80px 2fr 1fr 1fr 1fr",
+                        gap: 16,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        borderBottom: "1px solid #f0f0f0",
+                      }}
+                    >
+                      <div>Ảnh</div>
+                      <div>Sản phẩm</div>
+                      <div style={{ textAlign: "center" }}>Số lượng</div>
+                      <div style={{ textAlign: "right" }}>Giá</div>
+                      <div style={{ textAlign: "right" }}>Tổng</div>
+                    </div>
+                    {(detail.items || []).map((it, idx) => {
+                      const imageUrl =
+                        it.product_variant?.product?.image_url ||
+                        it.combo?.image_url;
+                      return (
+                        <div
+                          key={it.id}
+                          style={{
+                            padding: "12px 16px",
+                            display: "grid",
+                            gridTemplateColumns: "80px 2fr 1fr 1fr 1fr",
+                            gap: 16,
+                            borderBottom:
+                              idx < (detail.items?.length || 0) - 1
+                                ? "1px solid #f0f0f0"
+                                : "none",
+                            alignItems: "center",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 80,
+                              height: 80,
+                              borderRadius: 8,
+                              overflow: "hidden",
+                              background: "#f0f0f0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              border: "1px solid #e0e0e0",
+                            }}
+                          >
+                            <img
+                              src={`http://localhost:8000/images${
+                                imageUrl || ""
+                              }`}
+                              alt="product"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.src =
+                                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23f0f0f0' width='80' height='80'/%3E%3Ctext x='40' y='40' text-anchor='middle' dy='.3em' fill='%23999' font-size='10'%3ENo Image%3C/text%3E%3C/svg%3E";
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 500 }}>
+                              {it.product_variant_id
+                                ? it.product_variant?.product?.name ||
+                                  "Sản phẩm"
+                                : it.combo?.name || "Combo"}
+                            </div>
+                            {it.product_variant && (
+                              <div style={{ fontSize: 12, color: "#999" }}>
+                                {it.product_variant?.size?.name &&
+                                  `Size: ${it.product_variant.size.name}`}
+                                {it.product_variant?.size?.name &&
+                                  it.product_variant?.crust?.name &&
+                                  " • "}
+                                {it.product_variant?.crust?.name &&
+                                  `Crust: ${it.product_variant.crust.name}`}
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ textAlign: "center" }}>
+                            x{it.quantity}
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            {Number(it.price || 0).toLocaleString()}₫
+                          </div>
+                          <div
+                            style={{
+                              textAlign: "right",
+                              fontWeight: 600,
+                              color: "#d93025",
+                            }}
+                          >
+                            {(
+                              Number(it.price || 0) * it.quantity
+                            ).toLocaleString()}
+                            ₫
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Tóm tắt thanh toán */}
+                <div
+                  style={{
+                    background: "#fafafa",
+                    padding: 16,
+                    borderRadius: 8,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                    borderLeft: "4px solid #d93025",
+                  }}
+                >
+                  {detail?.coupon && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span>Mã giảm giá ({detail.coupon.code}):</span>
+                      <span style={{ color: "green" }}>
+                        -{Number(detail.discount || 0).toLocaleString()}₫
+                      </span>
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: 16,
+                      fontWeight: 600,
+                      paddingTop: detail?.coupon ? 8 : 0,
+                      borderTop: detail?.coupon ? "1px solid #e0e0e0" : "none",
+                    }}
+                  >
+                    <span>Tổng cộng:</span>
+                    <span style={{ color: "#d93025" }}>
+                      {Number(detail.total_amount || 0).toLocaleString()}₫
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
-      </Modal>
-    </div>
+            )}
+          </Modal>
+        </div>
+      </div>
     </div>
   );
 };

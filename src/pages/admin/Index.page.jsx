@@ -1,30 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, Col, Row, Statistic, Typography, Table, Tag, Space, Select, Menu, message } from "antd";
-import { Link, useLocation } from "react-router-dom";
-import { getDashboardStatsApi, getMonthlyRevenueApi, getOrdersApi } from "../../services/api.service";
-import { BarChartOutlined, ShoppingCartOutlined, TeamOutlined, ProfileOutlined, ArrowRightOutlined, AppstoreOutlined } from "@ant-design/icons";
+import { Card, Col, Row, Table, Tag, Select, Spin, Empty, Button } from "antd";
+import { Link } from "react-router-dom";
+import { getDashboardStatsApi, getOrdersApi } from "../../services/api.service";
+import {
+  BarChartOutlined,
+  ShoppingCartOutlined,
+  TeamOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  CalendarOutlined,
+  DollarOutlined,
+} from "@ant-design/icons";
 
 const IndexPage = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
-  const [monthly, setMonthly] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
   const [recentOrders, setRecentOrders] = useState([]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [s, m, o] = await Promise.all([
+      const [s, o] = await Promise.all([
         getDashboardStatsApi(),
-        getMonthlyRevenueApi({ year }),
         getOrdersApi(),
       ]);
       setStats(s.data?.data || s.data || null);
-      setMonthly(m.data?.data || m.data || []);
       const allOrders = o?.data || o || [];
       setRecentOrders(Array.isArray(allOrders) ? allOrders.slice(0, 6) : []);
     } catch (e) {
-      message.error("Tải dashboard thất bại");
+      console.error("Dashboard error:", e);
     } finally {
       setLoading(false);
     }
@@ -37,189 +42,261 @@ const IndexPage = () => {
   const statusData = useMemo(() => {
     const arr = stats?.order_status || [];
     const map = {
-      pending: { label: "Chờ xác nhận", color: "default" },
-      confirmed: { label: "Đã xác nhận", color: "blue" },
-      shipped: { label: "Đang giao", color: "orange" },
-      delivered: { label: "Đã giao", color: "green" },
-      cancelled: { label: "Đã huỷ", color: "red" },
+      pending: { label: "Chờ xác nhận", color: "warning" },
+      confirmed: { label: "Đã xác nhận", color: "processing" },
+      shipped: { label: "Đang giao", color: "blue" },
+      delivered: { label: "Đã giao", color: "success" },
+      cancelled: { label: "Đã huỷ", color: "error" },
     };
     return arr.map((i) => ({ ...i, ...map[i.status] }));
   }, [stats]);
 
   const columns = [
-    { title: "Trạng thái", dataIndex: "label", render: (v, r) => <Tag color={r.color}>{v}</Tag> },
-    { title: "Số đơn", dataIndex: "count" },
-    { title: "Tổng tiền", dataIndex: "total_amount", render: (v) => Number(v||0).toLocaleString()+"₫" },
+    {
+      title: "ID Đơn",
+      dataIndex: "id",
+      render: (v) => `#${v}`,
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: ["user", "full_name"],
+      render: (v) => v || "N/A",
+    },
+    {
+      title: "Tổng tiền",
+      dataIndex: "total_amount",
+      render: (v) => (
+        <span className="font-bold" style={{ color: "#c8102e" }}>
+          {Number(v || 0).toLocaleString()}₫
+        </span>
+      ),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      render: (status) => {
+        const statusMap = {
+          pending: { label: "Chờ xác nhận", color: "warning" },
+          confirmed: { label: "Đã xác nhận", color: "processing" },
+          shipped: { label: "Đang giao", color: "blue" },
+          delivered: { label: "Đã giao", color: "success" },
+          cancelled: { label: "Đã huỷ", color: "error" },
+        };
+        const s = statusMap[status] || { label: status, color: "default" };
+        return <Tag color={s.color}>{s.label}</Tag>;
+      },
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "created_at",
+      render: (v) => (v ? new Date(v).toLocaleDateString("vi-VN") : "N/A"),
+    },
   ];
 
-  const maxRevenue = useMemo(() => {
-    return monthly.reduce((m, x) => Math.max(m, Number(x.total_revenue || 0)), 0) || 1;
-  }, [monthly]);
+  const StatCard = ({ title, value, icon: Icon, color, trend }) => (
+    <Card className="rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-500 text-sm font-medium mb-2">{title}</p>
+          <p className="text-3xl font-black text-gray-900">{value}</p>
+          {trend && (
+            <div
+              className={`text-xs font-semibold mt-2 flex items-center gap-1 ${
+                trend > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {trend > 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+              {Math.abs(trend)}% so với tháng trước
+            </div>
+          )}
+        </div>
+        <div
+          className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl`}
+          style={{ backgroundColor: `${color}15` }}
+        >
+          <Icon style={{ color }} />
+        </div>
+      </div>
+    </Card>
+  );
 
   return (
-    <div style={{ padding: 16 }}>
-      <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 12, color: "#d93025" }}>
-        Admin Dashboard
-      </Typography.Title>
+    <div className="p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className="w-1.5 h-10 rounded-full"
+              style={{
+                background: "linear-gradient(to bottom, #c8102e, #e65100)",
+              }}
+            ></div>
+            <h1
+              className="text-4xl font-black m-0"
+              style={{ color: "#c8102e" }}
+            >
+              Dashboard Quản Lý
+            </h1>
+          </div>
+          <p className="text-gray-600 ml-5">
+            Tổng quan và thống kê hoạt động của cửa hàng Pizza
+          </p>
+        </div>
 
-      <Row gutter={[12, 12]}>
-       
-        <Col xs={24} md={18}>
-          <Row gutter={[12, 12]}>
-            <Col xs={24} md={6}>
-              <Card loading={loading} style={{ background: "linear-gradient(135deg,#e6f7ff,#ffffff)" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: "#888" }}>Doanh thu</div>
-                    <div style={{ fontSize: 22, fontWeight: 700 }}>{(Number(stats?.overview?.total_revenue||0)).toLocaleString()}₫</div>
-                  </div>
-                  <div style={{ lineHeight: 0, display: "flex", alignItems: "center" }}>
-                    <BarChartOutlined style={{ fontSize: 28, color: "#1677ff" }} />
-                  </div>
-                </div>
-              </Card>
-            </Col>
-            <Col xs={24} md={6}>
-              <Card loading={loading} style={{ background: "linear-gradient(135deg,#fff1f0,#ffffff)" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: "#888" }}>Tổng đơn</div>
-                    <div style={{ fontSize: 22, fontWeight: 700 }}>{Number(stats?.overview?.total_orders||0)}</div>
-                  </div>
-                  <div style={{ lineHeight: 0, display: "flex", alignItems: "center" }}>
-                    <ShoppingCartOutlined style={{ fontSize: 28, color: "#ff4d4f" }} />
-                  </div>
-                </div>
-              </Card>
-            </Col>
-            <Col xs={24} md={6}>
-              <Card loading={loading} style={{ background: "linear-gradient(135deg,#f6ffed,#ffffff)" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: "#888" }}>Khách hàng</div>
-                    <div style={{ fontSize: 22, fontWeight: 700 }}>{Number(stats?.overview?.unique_customers||0)}</div>
-                  </div>
-                  <div style={{ lineHeight: 0, display: "flex", alignItems: "center" }}>
-                    <TeamOutlined style={{ fontSize: 28, color: "#52c41a" }} />
-                  </div>
-                </div>
-              </Card>
-            </Col>
-            <Col xs={24} md={6}>
-              <Card loading={loading} style={{ background: "linear-gradient(135deg,#fffbe6,#ffffff)" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: "#888" }}>Giá trị TB</div>
-                    <div style={{ fontSize: 22, fontWeight: 700 }}>{(Number(stats?.overview?.avg_order_value||0)).toLocaleString()}₫</div>
-                  </div>
-                  <div style={{ lineHeight: 0, display: "flex", alignItems: "center" }}>
-                    <ProfileOutlined style={{ fontSize: 28, color: "#faad14" }} />
-                  </div>
-                </div>
-              </Card>
-            </Col>
-          </Row>
-
-          <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
-            <Col xs={24} md={12}>
-              <Card title="Đơn theo trạng thái" loading={loading}>
-                <Table
-                  size="small"
-                  rowKey={(r) => r.status}
-                  pagination={false}
-                  columns={columns}
-                  dataSource={statusData}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card
-                title={
-                  <Space>
-                    Doanh thu theo tháng
-                    <Select
-                      size="small"
-                      value={year}
-                      onChange={setYear}
-                      options={[0,1,2,3,4].map((d)=>({
-                        label: new Date().getFullYear()-d,
-                        value: new Date().getFullYear()-d,
-                      }))}
-                    />
-                  </Space>
-                }
-                loading={loading}
+        {/* Year Filter */}
+        <div className="mb-8 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <CalendarOutlined style={{ color: "#c8102e" }} />
+            <Select
+              value={year}
+              onChange={setYear}
+              style={{ width: 150 }}
+              options={[
+                { label: "2024", value: 2024 },
+                { label: "2025", value: 2025 },
+              ]}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Link to="/admin">
+              <Button
+                type="primary"
+                style={{ background: "#c8102e", borderColor: "#c8102e" }}
               >
-                <div>
-                  {monthly.map((m) => {
-                    const value = Number(m.total_revenue || 0);
-                    const percent = Math.round((value / maxRevenue) * 100);
-                    return (
-                      <div key={m.month} style={{ padding: "6px 0", borderBottom: "1px solid #f0f0f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                          <div>{m.month_name || `${m.month}/${m.year}`}</div>
-                          <div>{value.toLocaleString()}₫ ({m.total_orders} đơn)</div>
-                        </div>
-                        <div style={{ background: "#f0f2f5", height: 8, borderRadius: 6, overflow: "hidden" }}>
-                          <div style={{ width: `${percent}%`, height: "100%", background: "#1677ff" }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
+                Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <Spin spinning={loading}>
+          <Row gutter={[20, 20]} className="mb-10">
+            <Col xs={24} sm={12} lg={6}>
+              <StatCard
+                title="Doanh thu"
+                value={`${Number(
+                  stats?.overview?.total_revenue || 0
+                ).toLocaleString()}₫`}
+                icon={DollarOutlined}
+                color="#c8102e"
+                trend={12}
+              />
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <StatCard
+                title="Tổng đơn hàng"
+                value={Number(stats?.overview?.total_orders || 0)}
+                icon={ShoppingCartOutlined}
+                color="#e65100"
+                trend={8}
+              />
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <StatCard
+                title="Khách hàng"
+                value={Number(stats?.overview?.unique_customers || 0)}
+                icon={TeamOutlined}
+                color="#d84315"
+                trend={5}
+              />
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <StatCard
+                title="Sản phẩm"
+                value={Number(stats?.overview?.total_products || 0)}
+                icon={BarChartOutlined}
+                color="#bf360c"
+              />
             </Col>
           </Row>
 
-          <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
-            <Col xs={24} md={12}>
-              <Card title="Đơn hàng gần đây" extra={<Link to="/admin/orders">Xem tất cả</Link>}>
-                <Table
-                  size="small"
-                  rowKey={(r)=>r.id}
-                  pagination={false}
-                  dataSource={recentOrders}
-                  columns={[
-                    { title: "Mã", dataIndex: "id", width: 80 },
-                    { title: "Khách", render: (_, r) => r?.user?.full_name || r?.user?.email || `User#${r.user_id}` },
-                    { title: "Tổng", dataIndex: "total_amount", width: 120, render: (v)=>Number(v||0).toLocaleString()+"₫" },
-                    { title: "TT", dataIndex: "status", width: 120, render: (v)=>{
-                      const map = { pending: ["Chờ", "default"], confirmed: ["Xác nhận", "blue"], shipped:["Đang giao","orange"], delivered:["Đã giao","green"], cancelled:["Huỷ","red"] };
-                      const [label,color] = map[v] || [v, "default"]; return <Tag color={color}>{label}</Tag>;
-                    }},
-                  ]}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card title="Danh mục quản trị nhanh">
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
-                  <Link to="/admin/categories"><Card hoverable bodyStyle={{ padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Space><AppstoreOutlined /> Danh mục</Space>
-                    <ArrowRightOutlined />
-                  </Card></Link>
-                  <Link to="/admin/products"><Card hoverable bodyStyle={{ padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Space><ProfileOutlined /> Sản phẩm</Space>
-                    <ArrowRightOutlined />
-                  </Card></Link>
-                  <Link to="/admin/orders"><Card hoverable bodyStyle={{ padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Space><ShoppingCartOutlined /> Đơn hàng</Space>
-                    <ArrowRightOutlined />
-                  </Card></Link>
-                  <Link to="/admin/customers"><Card hoverable bodyStyle={{ padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Space><TeamOutlined /> Khách hàng</Space>
-                    <ArrowRightOutlined />
-                  </Card></Link>
-                  <Link to="/admin/content"><Card hoverable bodyStyle={{ padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Space><BarChartOutlined /> Nội dung</Space>
-                    <ArrowRightOutlined />
-                  </Card></Link>
+          {/* Order Status Table */}
+          <Card className="rounded-2xl border border-gray-100 shadow-sm mb-10">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 m-0">
+                Trạng thái đơn hàng
+              </h2>
+              <p className="text-gray-600 text-sm mt-1">
+                Phân bố đơn hàng theo trạng thái
+              </p>
+            </div>
+            <Table
+              dataSource={statusData}
+              columns={[
+                {
+                  title: "Trạng thái",
+                  dataIndex: "label",
+                  render: (v, r) => <Tag color={r.color}>{v}</Tag>,
+                },
+                { title: "Số đơn", dataIndex: "count" },
+                {
+                  title: "Tổng tiền",
+                  dataIndex: "total_amount",
+                  render: (v) => (
+                    <span
+                      className="font-semibold"
+                      style={{ color: "#c8102e" }}
+                    >
+                      {Number(v || 0).toLocaleString()}₫
+                    </span>
+                  ),
+                },
+              ]}
+              pagination={false}
+              loading={loading}
+              bordered={false}
+            />
+          </Card>
+
+          {/* Recent Orders */}
+          <Card className="rounded-2xl border border-gray-100 shadow-sm">
+            <div className="mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 m-0">
+                    Đơn hàng gần đây
+                  </h2>
+                  <p className="text-gray-600 text-sm mt-1">
+                    6 đơn hàng mới nhất trong hệ thống
+                  </p>
                 </div>
-              </Card>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
+                <Link to="/admin/order">
+                  <Button
+                    type="text"
+                    style={{ color: "#c8102e" }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = "#a00d26")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = "#c8102e")
+                    }
+                  >
+                    Xem tất cả →
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            {recentOrders.length > 0 ? (
+              <Table
+                dataSource={recentOrders}
+                columns={columns}
+                rowKey="id"
+                pagination={false}
+                loading={loading}
+                bordered={false}
+                size="middle"
+              />
+            ) : (
+              <Empty
+                description="Chưa có đơn hàng nào"
+                style={{ marginTop: 48, marginBottom: 48 }}
+              />
+            )}
+          </Card>
+        </Spin>
+      </div>
     </div>
   );
 };

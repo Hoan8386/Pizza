@@ -340,6 +340,6 @@ export {
     getNewsApi,
     createNewsApi,
     updateNewsApi,
-    deleteNewsApi
+    deleteNewsApi,
     getAllNews
 };
