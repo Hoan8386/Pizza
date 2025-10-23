@@ -2,6 +2,7 @@ import {
   ShoppingCartOutlined,
   UnorderedListOutlined,
   UserOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
 import logo from "../../assets/logo.svg";
 import { Popover } from "antd";
@@ -73,6 +74,21 @@ const Navbar = () => {
             >
               VI
             </Popover>
+            <Link to="/news">
+              <div
+                className="news flex justify-center items-center"
+                style={{
+                  fontSize: "1.2rem",
+                  border: "1px solid #ccc",
+                  padding: "8px 12px",
+                  borderRadius: "50px",
+                  height: "40px",
+                  width: "40px",
+                }}
+              >
+                <BellOutlined />
+              </div>
+            </Link>
             <Link to="/cart">
               <div
                 className="cart flex "
@@ -140,8 +156,10 @@ const Navbar = () => {
                     <>
                       <Link to="/info">
                         <div className="p-4 border-b border-gray-200">
-                          <p className="font-bold">{user.full_name}</p>
-                          <p className="text-sm text-gray-600">{user.email}</p>
+                          <p className="font-bold truncate">{user.full_name}</p>
+                          <p className="text-sm text-gray-600 truncate">
+                            {user.email}
+                          </p>
                         </div>
                       </Link>
                       <Link

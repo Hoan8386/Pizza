@@ -18,6 +18,7 @@ import { DetailCombo } from "./components/client/combos/Detail.page";
 import { OrderPage } from "./pages/Order.page";
 import IndexPage from "./pages/admin/Index.page";
 import ProtectedRoute from "./share/ProtectedRoute";
+import NewsPage from "./pages/News.page";
 
 const LayoutClient = () => {
   const { isAppLoading } = useContext(AuthContext);
@@ -91,6 +92,7 @@ function App() {
         { path: "checkout", element: <CheckOut /> },
         { path: "combos/:id", element: <DetailCombo /> },
         { path: "order", element: <OrderPage /> },
+        { path: "news", element: <NewsPage /> },
       ],
     },
 
