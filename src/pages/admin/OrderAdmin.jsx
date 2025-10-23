@@ -19,6 +19,7 @@ const statusOptions = [
 ];
 
 const mapStatus = (value) => statusOptions.find((s) => s.value === value) || statusOptions[0];
+const { RangePicker } = DatePicker;
 
 const OrderAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -37,15 +38,17 @@ const OrderAdmin = () => {
       if (status) params.status = status;
       if (userId) params.user_id = userId;
       const res = await getOrdersApi(params);
-      const list = res.data || res || [];
-      const filtered = keyword
-        ? list.filter((o) =>
-            String(o?.user?.full_name || o?.user?.email || "")
-              .toLowerCase()
-              .includes(keyword.toLowerCase()) || String(o?.id).includes(keyword)
-          )
-        : list;
-      setOrders(filtered);
+      const list = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.data?.data)
+        ? res.data.data
+        : Array.isArray(res)
+        ? res
+        : [];
+      
+      
+      setOrders(list);
+      setPagination((prev) => ({ ...prev, current: 1 }));
     } catch (e) {
       message.error("Tải đơn hàng thất bại");
     } finally {
@@ -56,6 +59,38 @@ const OrderAdmin = () => {
   useEffect(() => {
     fetchOrders();
   }, [status, userId]);
+
+  const filteredOrders = useMemo(() => {
+    let data = Array.isArray(orders) ? [...orders] : [];
+
+    if (keyword) {
+      const normalizedKeyword = keyword.toLowerCase();
+      data = data.filter(
+        (o) =>
+          String(o?.user?.full_name || o?.user?.email || "")
+            .toLowerCase()
+            .includes(normalizedKeyword) || String(o?.id).includes(keyword)
+      );
+    }
+
+    const [start, end] = dateRange || [];
+    if (start || end) {
+      data = data.filter((order) => {
+        if (!order?.created_at) return false;
+        const createdAt = dayjs(order.created_at);
+        if (!createdAt.isValid()) return false;
+        if (start && createdAt.isBefore(start.startOf("day"))) return false;
+        if (end && createdAt.isAfter(end.endOf("day"))) return false;
+        return true;
+      });
+    }
+
+    return data;
+  }, [orders, keyword, dateRange]);
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, current: 1 }));
+  }, [keyword, dateRange]);
 
   const nextStatusOptions = (cur) => {
     switch (cur) {
@@ -101,9 +136,16 @@ const OrderAdmin = () => {
       dataIndex: "id",
       width: 80,
     },
-    (
-      { title: "Ngày tạo", dataIndex: "created_at", render: (v) => dayjs(v).format("HH:mm DD/MM/YYYY") }
-    ),
+    {
+      title: "Ngày tạo",
+      dataIndex: "created_at",
+      width: 140,
+      render: (v) => {
+        if (!v) return "-";
+        const date = dayjs(v);
+        return date.isValid() ? date.format("DD/MM/YYYY HH:mm") : "-";
+      }
+    },
 
 
     {
@@ -190,6 +232,12 @@ const OrderAdmin = () => {
             value={status}
             onChange={setStatus}
           />
+          <RangePicker
+            value={dateRange}
+            format="DD/MM/YYYY"
+            allowClear
+            onChange={(values) => setDateRange(values && values.length ? values : null)}
+          />
           <div style={{ flex: 1 }} />
           <Button onClick={fetchOrders} type="primary" style={{ background: "#d93025" }}>Tải lại</Button>
         </div>
@@ -199,12 +247,13 @@ const OrderAdmin = () => {
           rowKey={(r) => r.id}
           loading={loading}
           columns={columns}
-          dataSource={orders}
+          dataSource={filteredOrders}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,
             showSizeChanger: false,
             showTotal: (t) => `${t} đơn hàng`,
+            total: filteredOrders.length,
           }}
           onChange={(pg) => setPagination({ current: pg.current, pageSize: pg.pageSize })}
         />
@@ -223,7 +272,7 @@ const OrderAdmin = () => {
               <div><b>Khách hàng:</b> {detail?.user?.full_name || detail?.user?.email}</div>
               <div><b>Trạng thái:</b> {mapStatus(detail.status).label}</div>
               <div><b>Tổng tiền:</b> {(Number(detail.total_amount||0)).toLocaleString()}₫</div>
-              <div><b>Thời gian:</b> {dayjs(detail.created_at).format("HH:mm DD/MM/YYYY")}</div>
+              <div><b>Thời gian:</b> {detail.created_at ? dayjs(detail.created_at).format("DD/MM/YYYY HH:mm") : "-"}</div>
             </div>
             <div>
               <div><b>Mã giảm giá:</b> {detail?.coupon?.code || "-"}</div>
