@@ -2,16 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Card,
+  Col,
   DatePicker,
   Divider,
   Input,
   Modal,
+  Row,
   Select,
   Space,
   Table,
   Tag,
   Typography,
-  message,
 } from "antd";
 import { AdminPageHeader } from "../../components/admin/PageHeader";
 import { ShoppingCartOutlined } from "@ant-design/icons";
@@ -22,6 +23,7 @@ import {
   updateOrderStatusApi,
   cancelOrderApi,
 } from "../../services/api.service";
+import { useToast } from "../../hooks/useToast";
 
 const statusOptions = [
   { label: "Chờ xác nhận", value: "pending", color: "default" },
@@ -43,6 +45,7 @@ const OrderAdmin = () => {
   const [dateRange, setDateRange] = useState(null);
   const [keyword, setKeyword] = useState("");
   const [detail, setDetail] = useState(null);
+  const { success, error } = useToast();
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -63,7 +66,7 @@ const OrderAdmin = () => {
         : list;
       setOrders(filtered);
     } catch (e) {
-      message.error("Tải đơn hàng thất bại");
+      error("Tải đơn hàng thất bại");
     } finally {
       setLoading(false);
     }
@@ -89,20 +92,20 @@ const OrderAdmin = () => {
   const setStatusAction = async (order, newStatus) => {
     try {
       await updateOrderStatusApi(order.id, newStatus);
-      message.success("Cập nhật trạng thái thành công");
+      success("Cập nhật trạng thái thành công");
       fetchOrders();
     } catch (e) {
-      message.error("Cập nhật trạng thái thất bại");
+      error("Cập nhật trạng thái thất bại");
     }
   };
 
   const cancelOrder = async (order) => {
     try {
       await cancelOrderApi(order.id);
-      message.success("Đã huỷ đơn hàng");
+      success("Đã huỷ đơn hàng");
       fetchOrders();
     } catch (e) {
-      message.error("Huỷ đơn thất bại");
+      error("Huỷ đơn thất bại");
     }
   };
 
@@ -183,43 +186,41 @@ const OrderAdmin = () => {
         />
         <div className="p-6 space-y-6">
           <Card style={{ borderRadius: "12px" }}>
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                alignItems: "center",
-                flexWrap: "wrap",
-                marginBottom: 12,
-              }}
-            >
-              <Input.Search
-                placeholder="Tìm theo mã đơn/khách hàng"
-                allowClear
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onSearch={fetchOrders}
-                style={{ width: 320 }}
-              />
-              <Select
-                allowClear
-                placeholder="Lọc trạng thái"
-                style={{ width: 200 }}
-                options={statusOptions.map((s) => ({
-                  label: s.label,
-                  value: s.value,
-                }))}
-                value={status}
-                onChange={setStatus}
-              />
-              <div style={{ flex: 1 }} />
-              <Button
-                onClick={fetchOrders}
-                type="primary"
-                style={{ background: "#d93025" }}
-              >
-                Tải lại
-              </Button>
-            </div>
+            <Row gutter={[8, 8]} align="middle" className="mb-3">
+              <Col xs={24} sm={24} md={10}>
+                <Input.Search
+                  placeholder="Tìm theo mã đơn/khách hàng"
+                  allowClear
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onSearch={fetchOrders}
+                  className="w-full"
+                />
+              </Col>
+              <Col xs={12} sm={12} md={6}>
+                <Select
+                  allowClear
+                  placeholder="Lọc trạng thái"
+                  className="w-full"
+                  options={statusOptions.map((s) => ({
+                    label: s.label,
+                    value: s.value,
+                  }))}
+                  value={status}
+                  onChange={setStatus}
+                />
+              </Col>
+              <Col xs={12} sm={12} md={8}>
+                <Button
+                  onClick={fetchOrders}
+                  type="primary"
+                  style={{ background: "#d93025" }}
+                  className="w-full"
+                >
+                  Tải lại
+                </Button>
+              </Col>
+            </Row>
             <Divider style={{ margin: "8px 0" }} />
             <Table
               size="middle"
@@ -227,6 +228,7 @@ const OrderAdmin = () => {
               loading={loading}
               columns={columns}
               dataSource={orders}
+              scroll={{ x: 800 }}
               pagination={{
                 current: pagination.current,
                 pageSize: pagination.pageSize,
@@ -244,7 +246,8 @@ const OrderAdmin = () => {
             open={!!detail}
             onCancel={() => setDetail(null)}
             footer={<Button onClick={() => setDetail(null)}>Đóng</Button>}
-            width={900}
+            width={Math.min(900, window.innerWidth - 40)}
+            style={{ maxWidth: "calc(100vw - 40px)" }}
           >
             {detail && (
               <div

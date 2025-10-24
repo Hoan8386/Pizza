@@ -19,20 +19,22 @@ import {
 import {
   Button,
   Card,
+  Col,
   Divider,
   Form,
   Input,
   Modal,
   Popconfirm,
+  Row,
   Select,
   Space,
   Table,
   Tag,
   Typography,
   Upload,
-  message,
 } from "antd";
 import { Link } from "react-router-dom";
+import { useToast } from "../../hooks/useToast";
 
 const ProductAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,7 @@ const ProductAdmin = () => {
   const [imageFileName, setImageFileName] = useState(null);
   const [form] = Form.useForm();
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+  const { success, error } = useToast();
 
   const fetchMeta = async () => {
     try {
@@ -73,7 +76,7 @@ const ProductAdmin = () => {
       const data = res.data || res || [];
       setProducts(Array.isArray(data) ? data : []);
     } catch (e) {
-      message.error("Tải sản phẩm thất bại");
+      error("Tải sản phẩm thất bại");
     } finally {
       setLoading(false);
     }
@@ -116,10 +119,10 @@ const ProductAdmin = () => {
   const handleDelete = async (id) => {
     try {
       await deleteProductApi(id);
-      message.success("Đã xoá sản phẩm");
+      success("Đã xoá sản phẩm");
       fetchProducts(keyword);
     } catch (e) {
-      message.error("Xoá sản phẩm thất bại");
+      error("Xoá sản phẩm thất bại");
     }
   };
 
@@ -143,7 +146,7 @@ const ProductAdmin = () => {
           basePayload.image_url = imageFileName;
         }
         await updateProductApi(editingProduct.id, basePayload);
-        message.success("Cập nhật sản phẩm thành công");
+        success("Cập nhật sản phẩm thành công");
       } else {
         // Create with variants
         const variants = (values.variants || [])
@@ -164,7 +167,7 @@ const ProductAdmin = () => {
         };
         console.log("check payload ", payload);
         await createProductApi(payload);
-        message.success("Tạo sản phẩm thành công");
+        success("Tạo sản phẩm thành công");
       }
 
       setIsModalOpen(false);
@@ -175,7 +178,7 @@ const ProductAdmin = () => {
       fetchProducts(keyword);
     } catch (e) {
       if (e && e.errorFields) return; // antd validation
-      message.error("Lưu sản phẩm thất bại");
+      error("Lưu sản phẩm thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -308,30 +311,28 @@ const ProductAdmin = () => {
         image="🍕"
       />
       <Card style={{ borderRadius: "12px" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-            flexWrap: "wrap",
-            marginBottom: 12,
-          }}
-        >
-          <Input.Search
-            placeholder="Tìm theo tên/mô tả"
-            allowClear
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onSearch={(v) => fetchProducts(v)}
-            style={{ width: 320 }}
-          />
-          <Button onClick={() => fetchProducts(keyword)}>Tải lại</Button>
-          <div style={{ flex: 1 }} />
-          <Space>
+        <Row gutter={[8, 8]} align="middle" className="mb-3">
+          <Col xs={24} sm={24} md={10}>
+            <Input.Search
+              placeholder="Tìm theo tên/mô tả"
+              allowClear
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onSearch={(v) => fetchProducts(v)}
+              className="w-full"
+            />
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Button onClick={() => fetchProducts(keyword)} className="w-full">
+              Tải lại
+            </Button>
+          </Col>
+          <Col xs={12} sm={18} md={10} className="flex gap-2">
             <Button
               icon={<BarsOutlined />}
               type={viewMode === "table" ? "primary" : "default"}
               onClick={() => setViewMode("table")}
+              className="flex-1"
             >
               Danh sách
             </Button>
@@ -339,6 +340,7 @@ const ProductAdmin = () => {
               icon={<AppstoreOutlined />}
               type={viewMode === "grid" ? "primary" : "default"}
               onClick={() => setViewMode("grid")}
+              className="flex-1"
             >
               Lưới
             </Button>
@@ -346,11 +348,12 @@ const ProductAdmin = () => {
               type="primary"
               style={{ background: "#d93025" }}
               onClick={openCreate}
+              className="flex-1"
             >
-              + Thêm sản phẩm
+              + Thêm
             </Button>
-          </Space>
-        </div>
+          </Col>
+        </Row>
         <Divider style={{ margin: "8px 0" }} />
 
         {viewMode === "table" ? (
@@ -360,6 +363,7 @@ const ProductAdmin = () => {
             loading={loading}
             columns={columns}
             dataSource={products}
+            scroll={{ x: 800 }}
             pagination={{
               current: pagination.current,
               pageSize: pagination.pageSize,
@@ -484,7 +488,8 @@ const ProductAdmin = () => {
         }}
         onOk={handleSubmit}
         confirmLoading={isSubmitting}
-        width={800}
+        width={Math.min(800, window.innerWidth - 40)}
+        style={{ maxWidth: "calc(100vw - 40px)" }}
         okText={editingProduct ? "Lưu" : "Tạo mới"}
         cancelText="Huỷ"
       >
@@ -511,12 +516,12 @@ const ProductAdmin = () => {
               fileList={[]}
               beforeUpload={(file) => {
                 if (!file.type.startsWith("image/")) {
-                  message.error("Vui lòng chọn file ảnh!");
+                  error("Vui lòng chọn file ảnh!");
                   return false;
                 }
                 const isLt5M = file.size / 1024 / 1024 < 5;
                 if (!isLt5M) {
-                  message.error("Ảnh phải nhỏ hơn 5MB!");
+                  error("Ảnh phải nhỏ hơn 5MB!");
                   return false;
                 }
                 const reader = new FileReader();

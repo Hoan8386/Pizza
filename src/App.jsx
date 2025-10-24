@@ -17,6 +17,8 @@ import { useState } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import LayoutApp from "./components/share/Layout.app";
 import { Spin, Layout, Menu } from "antd";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { InfoPage } from "./pages/Info.page";
 import { CartPage } from "./pages/Cart.page";
 import { CheckOut } from "./components/client/checkout/CheckOut";
@@ -30,6 +32,8 @@ import CatalogAdmin from "./pages/admin/CatalogAdmin";
 import CustomerAdmin from "./pages/admin/CustomerAdmin";
 import ContentAdmin from "./pages/admin/ContentAdmin";
 import VoucherAdmin from "./pages/admin/VoucherAdmin";
+import CrustAdmin from "./pages/admin/CrustAdmin";
+import ComboAdmin from "./pages/admin/ComboAdmin";
 import ProtectedRoute from "./share/ProtectedRoute";
 import NewsPage from "./pages/News.page";
 import "./styles/admin.css";
@@ -46,6 +50,8 @@ import {
   MenuUnfoldOutlined,
   ShoppingOutlined,
   GiftOutlined,
+  BgColorsOutlined,
+  CoffeeOutlined,
 } from "@ant-design/icons";
 
 const { Sider, Content } = Layout;
@@ -84,6 +90,17 @@ const LayoutAdmin = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
+  // Handle window resize
+  useState(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setCollapsed(true);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const menuItems = [
     {
       key: "/admin",
@@ -120,6 +137,16 @@ const LayoutAdmin = () => {
       icon: <GiftOutlined />,
       label: "Voucher",
     },
+    {
+      key: "/admin/crusts",
+      icon: <BgColorsOutlined />,
+      label: "Đế Bánh",
+    },
+    {
+      key: "/admin/combos",
+      icon: <CoffeeOutlined />,
+      label: "Combo",
+    },
   ];
 
   const getSelectedKey = () => {
@@ -149,6 +176,8 @@ const LayoutAdmin = () => {
     if (path.includes("customers")) return "Khách hàng";
     if (path.includes("content")) return "Nội dung";
     if (path.includes("vouchers")) return "Quản Lý Voucher";
+    if (path.includes("crusts")) return "Quản Lý Đế Bánh";
+    if (path.includes("combos")) return "Quản Lý Combo";
     return "Admin";
   };
 
@@ -180,24 +209,33 @@ const LayoutAdmin = () => {
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
-        width={280}
+        width={window.innerWidth < 768 ? 200 : 280}
+        collapsedWidth={window.innerWidth < 768 ? 0 : 80}
+        breakpoint="md"
+        onBreakpoint={setCollapsed}
         style={{
           background:
             "linear-gradient(180deg, #c8102e 0%, #a00d26 50%, #8b0d1f 100%)",
           boxShadow: "4px 0 20px rgba(200,16,46,0.4)",
           borderRadius: "0 20px 20px 0",
           overflow: "hidden",
+          position: "relative",
+          zIndex: 100,
         }}
         trigger={null}
       >
         {/* Logo */}
         <div
           style={{
-            height: 80,
+            height: window.innerWidth < 768 ? 60 : 80,
             display: "flex",
             alignItems: "center",
             justifyContent: collapsed ? "center" : "flex-start",
-            padding: collapsed ? "0 20px" : "0 28px",
+            padding: collapsed
+              ? "0 20px"
+              : window.innerWidth < 768
+              ? "0 12px"
+              : "0 28px",
             background:
               "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)",
             borderBottom: "2px solid rgba(255,255,255,0.3)",
@@ -222,7 +260,7 @@ const LayoutAdmin = () => {
               <div
                 style={{
                   color: "#fff",
-                  fontSize: 24,
+                  fontSize: window.innerWidth < 768 ? 18 : 24,
                   fontWeight: "bold",
                   lineHeight: 1,
                   textShadow: "0 2px 4px rgba(0,0,0,0.3)",
@@ -234,7 +272,7 @@ const LayoutAdmin = () => {
               <div
                 style={{
                   color: "#fff",
-                  fontSize: 13,
+                  fontSize: window.innerWidth < 768 ? 11 : 13,
                   marginTop: 6,
                   opacity: 0.9,
                   fontWeight: 500,
@@ -371,7 +409,7 @@ const LayoutAdmin = () => {
           style={{
             background:
               "linear-gradient(135deg, #fff 0%, #fef5f6 50%, #fff 100%)",
-            padding: "24px 40px",
+            padding: window.innerWidth < 768 ? "16px 12px" : "24px 40px",
             boxShadow: "0 4px 20px rgba(200,16,46,0.1)",
             display: "flex",
             alignItems: "center",
@@ -379,13 +417,15 @@ const LayoutAdmin = () => {
             borderBottom: "2px solid rgba(200,16,46,0.1)",
             backdropFilter: "blur(10px)",
             flexShrink: 0,
+            flexWrap: "wrap",
+            gap: "12px",
           }}
         >
-          <div>
+          <div style={{ minWidth: 0 }}>
             <h2
               style={{
                 margin: 0,
-                fontSize: 28,
+                fontSize: window.innerWidth < 768 ? "20px" : "28px",
                 fontWeight: 700,
                 color: "#c8102e",
                 textShadow: "0 1px 2px rgba(200,16,46,0.1)",
@@ -397,7 +437,7 @@ const LayoutAdmin = () => {
             <p
               style={{
                 margin: "8px 0 0 0",
-                fontSize: 16,
+                fontSize: window.innerWidth < 768 ? "13px" : "16px",
                 color: "#666",
                 fontWeight: 400,
               }}
@@ -405,23 +445,34 @@ const LayoutAdmin = () => {
               Quản lý và thống kê hệ thống
             </p>
           </div>
-          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: window.innerWidth < 768 ? "8px" : "20px",
+              alignItems: "center",
+            }}
+          >
             <div
               style={{
                 background: "linear-gradient(135deg, #c8102e 0%, #e65100 100%)",
                 color: "#fff",
-                padding: "12px 20px",
+                padding: window.innerWidth < 768 ? "8px 12px" : "12px 20px",
                 borderRadius: "25px",
-                fontSize: 14,
+                fontSize: window.innerWidth < 768 ? "12px" : "14px",
                 fontWeight: 600,
                 boxShadow: "0 4px 15px rgba(200,16,46,0.3)",
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
+                whiteSpace: "nowrap",
               }}
             >
               <span>📅</span>
-              <span>{new Date().toLocaleDateString("vi-VN")}</span>
+              <span
+                style={{ display: window.innerWidth < 768 ? "none" : "inline" }}
+              >
+                {new Date().toLocaleDateString("vi-VN")}
+              </span>
             </div>
           </div>
         </div>
@@ -490,6 +541,8 @@ function App() {
         { path: "customers", element: <CustomerAdmin /> },
         { path: "content", element: <ContentAdmin /> },
         { path: "vouchers", element: <VoucherAdmin /> },
+        { path: "crusts", element: <CrustAdmin /> },
+        { path: "combos", element: <ComboAdmin /> },
         { path: "catalogs", element: <CatalogAdmin /> },
 
         // { path: "dish", element: <TableDish /> },
@@ -501,7 +554,23 @@ function App() {
     // { path: "/unauthorized", element: <Unauthorized /> },
   ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

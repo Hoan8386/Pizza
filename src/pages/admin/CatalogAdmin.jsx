@@ -1,17 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Card,
+  Col,
   Divider,
   Form,
   Input,
   Modal,
   Popconfirm,
+  Row,
   Space,
   Table,
   Tag,
   Typography,
-  message,
   Upload,
 } from "antd";
 import { Link } from "react-router-dom";
@@ -23,6 +24,7 @@ import {
 } from "../../services/api.service";
 import { AdminPageHeader } from "../../components/admin/PageHeader";
 import { AppstoreOutlined, PlusOutlined } from "@ant-design/icons";
+import { useToast } from "../../hooks/useToast";
 
 const CatalogAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -36,6 +38,7 @@ const CatalogAdmin = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [fileName, setFileName] = useState(null);
   const [form] = Form.useForm();
+  const { success, error } = useToast();
 
   const fetchData = async () => {
     setLoading(true);
@@ -51,7 +54,7 @@ const CatalogAdmin = () => {
         : [];
       setCategories(filtered);
     } catch (e) {
-      message.error("Tải danh mục thất bại");
+      error("Tải danh mục thất bại");
     } finally {
       setLoading(false);
     }
@@ -97,7 +100,7 @@ const CatalogAdmin = () => {
         }
         console.log("check value", updateData);
         await updateCategoryApi(editing.id, updateData);
-        message.success("Cập nhật danh mục thành công");
+        success("Cập nhật danh mục thành công");
       } else {
         const createData = {
           ...values,
@@ -105,7 +108,7 @@ const CatalogAdmin = () => {
           url: fileName, // Truyền url giống update
         };
         await createCategoryApi(createData);
-        message.success("Tạo danh mục thành công");
+        success("Tạo danh mục thành công");
       }
       setIsModalOpen(false);
       setEditing(null);
@@ -115,7 +118,7 @@ const CatalogAdmin = () => {
       fetchData();
     } catch (e) {
       if (e && e.errorFields) return;
-      message.error("Lưu danh mục thất bại");
+      error("Lưu danh mục thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -124,29 +127,31 @@ const CatalogAdmin = () => {
   const handleDelete = async (id) => {
     try {
       await deleteCategoryApi(id);
-      message.success("Đã xoá danh mục");
+      success("Đã xoá danh mục");
       fetchData();
     } catch (e) {
-      message.error("Xoá danh mục thất bại");
+      error("Xoá danh mục thất bại");
     }
   };
 
   const columns = [
     {
       title: "STT",
-      width: 70,
+      width: 50,
       render: (_, __, index) =>
         (pagination.current - 1) * pagination.pageSize + index + 1,
+      responsive: ["sm"],
     },
     {
       title: "Ảnh",
       dataIndex: "url",
-      width: 200,
+      width: 100,
+      responsive: ["md"],
       render: (url) => (
         <div
           style={{
             width: "100%",
-            height: 80,
+            height: 60,
             borderRadius: "8px",
             overflow: "hidden",
             background: "#f0f0f0",
@@ -171,22 +176,25 @@ const CatalogAdmin = () => {
     {
       title: "Tên danh mục",
       dataIndex: "name",
+      responsive: ["xs"],
     },
     {
       title: "Mô tả",
       dataIndex: "description",
       ellipsis: true,
+      responsive: ["lg"],
     },
     {
       title: "Sản phẩm",
       dataIndex: "products_count",
       render: (v) => <Tag>{v || 0}</Tag>,
-      width: 120,
+      width: 100,
+      responsive: ["md"],
     },
     {
       title: "Thao tác",
       render: (_, r) => (
-        <Space>
+        <Space size="small">
           <Button size="small" onClick={() => openEdit(r)}>
             Sửa
           </Button>
@@ -202,7 +210,8 @@ const CatalogAdmin = () => {
           </Popconfirm>
         </Space>
       ),
-      width: 160,
+      width: 140,
+      responsive: ["xs"],
     },
   ];
 
@@ -217,33 +226,33 @@ const CatalogAdmin = () => {
       />
 
       <Card style={{ borderRadius: "12px" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-            flexWrap: "wrap",
-            marginBottom: 12,
-          }}
-        >
-          <Input.Search
-            placeholder="Tìm theo tên"
-            allowClear
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onSearch={fetchData}
-            style={{ width: 320 }}
-          />
-          <Button onClick={fetchData}>Tải lại</Button>
-          <div style={{ flex: 1 }} />
-          <Button
-            type="primary"
-            style={{ background: "#d93025" }}
-            onClick={openCreate}
-          >
-            + Thêm danh mục
-          </Button>
-        </div>
+        <Row gutter={[8, 8]} align="middle" className="mb-3">
+          <Col xs={24} sm={24} md={8} lg={6}>
+            <Input.Search
+              placeholder="Tìm theo tên"
+              allowClear
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onSearch={fetchData}
+              className="w-full"
+            />
+          </Col>
+          <Col xs={12} sm={6} md={3} lg={2}>
+            <Button onClick={fetchData} className="w-full">
+              Tải lại
+            </Button>
+          </Col>
+          <Col xs={12} sm={6} md={5} lg={4}>
+            <Button
+              type="primary"
+              style={{ background: "#d93025" }}
+              onClick={openCreate}
+              className="w-full"
+            >
+              + Thêm danh mục
+            </Button>
+          </Col>
+        </Row>
         <Divider style={{ margin: "8px 0" }} />
         <Table
           size="middle"
@@ -276,7 +285,8 @@ const CatalogAdmin = () => {
         confirmLoading={isSubmitting}
         okText={editing ? "Lưu" : "Tạo mới"}
         cancelText="Huỷ"
-        width={600}
+        width={Math.min(600, window.innerWidth - 40)}
+        style={{ maxWidth: "calc(100vw - 40px)" }}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -309,12 +319,12 @@ const CatalogAdmin = () => {
               fileList={[]}
               beforeUpload={(file) => {
                 if (!file.type.startsWith("image/")) {
-                  message.error("Vui lòng chọn file ảnh!");
+                  error("Vui lòng chọn file ảnh!");
                   return false;
                 }
                 const isLt5M = file.size / 1024 / 1024 < 5;
                 if (!isLt5M) {
-                  message.error("Ảnh phải nhỏ hơn 5MB!");
+                  error("Ảnh phải nhỏ hơn 5MB!");
                   return false;
                 }
                 const reader = new FileReader();

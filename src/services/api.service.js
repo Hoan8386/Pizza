@@ -56,6 +56,21 @@ const getAllCrusts = () => {
     return axios.get(URL_BACKEND);
 };
 
+// Tạo đế bánh mới
+const createCrustApi = (payload) => {
+    return axios.post('/api/crusts', payload);
+};
+
+// Cập nhật đế bánh
+const updateCrustApi = (id, payload) => {
+    return axios.put(`/api/crusts/${id}`, payload);
+};
+
+// Xóa đế bánh
+const deleteCrustApi = (id) => {
+    return axios.delete(`/api/crusts/${id}`);
+};
+
 // Lấy sản phẩm theo category_id
 const getProductsByCategory = (categoryId) => {
     const URL_BACKEND = `api/products?category_id=${categoryId}`;
@@ -311,6 +326,24 @@ const deleteVoucherApi = (id) => {
     return axios.delete(URL_BACKEND);
 };
 
+// Combo CRUD
+const getAllCombosApi = () => {
+    const URL_BACKEND = "/api/combos";
+    return axios.get(URL_BACKEND);
+};
+
+const createComboApi = (payload) => {
+    return axios.post('/api/combos', payload);
+};
+
+const updateComboApi = (id, payload) => {
+    return axios.put(`/api/combos/${id}`, payload);
+};
+
+const deleteComboApi = (id) => {
+    return axios.delete(`/api/combos/${id}`);
+};
+
 export {
     getAllProducts,
     createProductApi,
@@ -326,6 +359,9 @@ export {
     deleteUserApi,
     getAllSizes,
     getAllCrusts,
+    createCrustApi,
+    updateCrustApi,
+    deleteCrustApi,
     getProductsByCategory,
     createUserApi,
     loginApi,
@@ -366,5 +402,9 @@ export {
     getAllVouchersApi,
     createVoucherApi,
     updateVoucherApi,
-    deleteVoucherApi
+    deleteVoucherApi,
+    getAllCombosApi,
+    createComboApi,
+    updateComboApi,
+    deleteComboApi
 };

@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import {
   Button,
   Card,
+  Col,
   Divider,
   Form,
   Input,
   Modal,
   Popconfirm,
+  Row,
   Space,
   Table,
   Tag,
   Typography,
-  message,
 } from "antd";
 import { AdminPageHeader } from "../../components/admin/PageHeader";
 import { TeamOutlined } from "@ant-design/icons";
@@ -21,6 +22,7 @@ import {
   updateUserByAdminApi,
   deleteUserApi,
 } from "../../services/api.service";
+import { useToast } from "../../hooks/useToast";
 
 const CustomerAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -31,6 +33,7 @@ const CustomerAdmin = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form] = Form.useForm();
+  const { success, error } = useToast();
 
   const fetchData = async () => {
     setLoading(true);
@@ -39,7 +42,7 @@ const CustomerAdmin = () => {
       const data = res.data?.data || res.data || res || [];
       setUsers(Array.isArray(data) ? data : []);
     } catch (e) {
-      message.error("Tải khách hàng thất bại");
+      error("Tải khách hàng thất bại");
     } finally {
       setLoading(false);
     }
@@ -72,10 +75,10 @@ const CustomerAdmin = () => {
       setIsSubmitting(true);
       if (editing) {
         await updateUserByAdminApi(editing.id, { ...values, role: "customer" });
-        message.success("Cập nhật khách hàng thành công");
+        success("Cập nhật khách hàng thành công");
       } else {
         await createUserByAdminApi({ ...values, role: "customer" });
-        message.success("Tạo khách hàng thành công");
+        success("Tạo khách hàng thành công");
       }
       setIsModalOpen(false);
       setEditing(null);
@@ -83,7 +86,7 @@ const CustomerAdmin = () => {
       fetchData();
     } catch (e) {
       if (e && e.errorFields) return;
-      message.error("Lưu khách hàng thất bại");
+      error("Lưu khách hàng thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -92,10 +95,10 @@ const CustomerAdmin = () => {
   const handleDelete = async (id) => {
     try {
       await deleteUserApi(id);
-      message.success("Đã xoá khách hàng");
+      success("Đã xoá khách hàng");
       fetchData();
     } catch (e) {
-      message.error("Xoá khách hàng thất bại");
+      error("Xoá khách hàng thất bại");
     }
   };
 
@@ -150,33 +153,33 @@ const CustomerAdmin = () => {
         />
         <div className="p-6 space-y-6">
           <Card style={{ borderRadius: "12px" }}>
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                alignItems: "center",
-                flexWrap: "wrap",
-                marginBottom: 12,
-              }}
-            >
-              <Input.Search
-                placeholder="Tìm theo tên/email"
-                allowClear
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onSearch={fetchData}
-                style={{ width: 320 }}
-              />
-              <Button onClick={fetchData}>Tải lại</Button>
-              <div style={{ flex: 1 }} />
-              <Button
-                type="primary"
-                style={{ background: "#d93025" }}
-                onClick={openCreate}
-              >
-                + Thêm khách hàng
-              </Button>
-            </div>
+            <Row gutter={[8, 8]} align="middle" className="mb-3">
+              <Col xs={24} sm={24} md={8}>
+                <Input.Search
+                  placeholder="Tìm theo tên/email"
+                  allowClear
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onSearch={fetchData}
+                  className="w-full"
+                />
+              </Col>
+              <Col xs={12} sm={6} md={3}>
+                <Button onClick={fetchData} className="w-full">
+                  Tải lại
+                </Button>
+              </Col>
+              <Col xs={12} sm={6} md={5}>
+                <Button
+                  type="primary"
+                  style={{ background: "#d93025" }}
+                  onClick={openCreate}
+                  className="w-full"
+                >
+                  + Thêm khách
+                </Button>
+              </Col>
+            </Row>
             <Divider style={{ margin: "8px 0" }} />
             <Table
               size="middle"
@@ -184,6 +187,7 @@ const CustomerAdmin = () => {
               loading={loading}
               columns={columns}
               dataSource={users}
+              scroll={{ x: 800 }}
               pagination={{
                 current: pagination.current,
                 pageSize: pagination.pageSize,
@@ -206,6 +210,8 @@ const CustomerAdmin = () => {
             onOk={handleSubmit}
             confirmLoading={isSubmitting}
             okText={editing ? "Lưu" : "Tạo mới"}
+            width={Math.min(600, window.innerWidth - 40)}
+            style={{ maxWidth: "calc(100vw - 40px)" }}
             cancelText="Huỷ"
           >
             <Form form={form} layout="vertical">

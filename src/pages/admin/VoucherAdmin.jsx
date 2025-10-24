@@ -8,7 +8,6 @@ import {
   Space,
   Table,
   Tag,
-  message,
   Card,
   Select,
   InputNumber,
@@ -32,6 +31,7 @@ import {
   updateVoucherApi,
   deleteVoucherApi,
 } from "../../services/api.service";
+import { useToast } from "../../hooks/useToast";
 
 const VoucherAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -42,6 +42,7 @@ const VoucherAdmin = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form] = Form.useForm();
+  const { success, error } = useToast();
 
   useEffect(() => {
     fetchData();
@@ -54,7 +55,7 @@ const VoucherAdmin = () => {
       setVouchers(res.data?.data || res.data || []);
     } catch (error) {
       console.error("Error fetching vouchers:", error);
-      message.error("Không thể tải dữ liệu voucher");
+      error("Không thể tải dữ liệu voucher");
     } finally {
       setLoading(false);
     }
@@ -111,17 +112,17 @@ const VoucherAdmin = () => {
 
         await updateVoucherApi(editing.id, updateData);
         fetchData();
-        message.success("Cập nhật voucher thành công");
+        success("Cập nhật voucher thành công");
       } else {
         await createVoucherApi(submitData);
         fetchData();
-        message.success("Tạo voucher thành công");
+        success("Tạo voucher thành công");
       }
       setIsModalOpen(false);
       form.resetFields();
     } catch (error) {
       console.error("Error:", error);
-      message.error(editing ? "Cập nhật thất bại" : "Tạo voucher thất bại");
+      error(editing ? "Cập nhật thất bại" : "Tạo voucher thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -131,10 +132,10 @@ const VoucherAdmin = () => {
     try {
       await deleteVoucherApi(id);
       fetchData();
-      message.success("Xóa voucher thành công");
+      success("Xóa voucher thành công");
     } catch (error) {
       console.error("Error:", error);
-      message.error("Xóa thất bại");
+      error("Xóa thất bại");
     }
   };
 
@@ -313,7 +314,8 @@ const VoucherAdmin = () => {
           form.resetFields();
         }}
         footer={null}
-        width={600}
+        width={Math.min(600, window.innerWidth - 40)}
+        style={{ maxWidth: "calc(100vw - 40px)" }}
       >
         <Form
           form={form}

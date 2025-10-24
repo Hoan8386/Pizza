@@ -2,18 +2,19 @@ import { useEffect, useState } from "react";
 import {
   Button,
   Card,
+  Col,
   Divider,
   Form,
   Input,
   Modal,
   Popconfirm,
+  Row,
   Select,
   Space,
   Table,
   Tabs,
   Tag,
   Typography,
-  message,
   Switch,
   Upload,
 } from "antd";
@@ -30,6 +31,7 @@ import {
   updateNewsApi,
   deleteNewsApi,
 } from "../../services/api.service";
+import { useToast } from "../../hooks/useToast";
 
 const BannerTab = () => {
   const [loading, setLoading] = useState(false);
@@ -42,6 +44,7 @@ const BannerTab = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFileName, setImageFileName] = useState(null);
   const [form] = Form.useForm();
+  const { success, error } = useToast();
 
   const fetchData = async () => {
     setLoading(true);
@@ -57,7 +60,7 @@ const BannerTab = () => {
         : [];
       setBanners(filtered);
     } catch (e) {
-      message.error("Tải banner thất bại");
+      error("Tải banner thất bại");
     } finally {
       setLoading(false);
     }
@@ -98,9 +101,7 @@ const BannerTab = () => {
 
       if (editing) await updateBannerApi(editing.id, payload);
       else await createBannerApi(payload);
-      message.success(
-        editing ? "Cập nhật banner thành công" : "Tạo banner thành công"
-      );
+      success(editing ? "Cập nhật banner thành công" : "Tạo banner thành công");
       setIsModalOpen(false);
       setEditing(null);
       form.resetFields();
@@ -109,7 +110,7 @@ const BannerTab = () => {
       fetchData();
     } catch (e) {
       if (e && e.errorFields) return;
-      message.error("Lưu banner thất bại");
+      error("Lưu banner thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -118,10 +119,10 @@ const BannerTab = () => {
   const handleDelete = async (id) => {
     try {
       await deleteBannerApi(id);
-      message.success("Đã xoá banner");
+      success("Đã xoá banner");
       fetchData();
     } catch {
-      message.error("Xoá banner thất bại");
+      error("Xoá banner thất bại");
     }
   };
 
@@ -187,33 +188,33 @@ const BannerTab = () => {
 
   return (
     <Card>
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          alignItems: "center",
-          flexWrap: "wrap",
-          marginBottom: 12,
-        }}
-      >
-        <Input.Search
-          placeholder="Tìm theo link"
-          allowClear
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onSearch={fetchData}
-          style={{ width: 320 }}
-        />
-        <Button onClick={fetchData}>Tải lại</Button>
-        <div style={{ flex: 1 }} />
-        <Button
-          type="primary"
-          style={{ background: "#d93025" }}
-          onClick={openCreate}
-        >
-          + Thêm banner
-        </Button>
-      </div>
+      <Row gutter={[8, 8]} align="middle" className="mb-3">
+        <Col xs={24} sm={24} md={8}>
+          <Input.Search
+            placeholder="Tìm theo link"
+            allowClear
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onSearch={fetchData}
+            className="w-full"
+          />
+        </Col>
+        <Col xs={12} sm={6} md={3}>
+          <Button onClick={fetchData} className="w-full">
+            Tải lại
+          </Button>
+        </Col>
+        <Col xs={12} sm={6} md={5}>
+          <Button
+            type="primary"
+            style={{ background: "#d93025" }}
+            onClick={openCreate}
+            className="w-full"
+          >
+            + Thêm banner
+          </Button>
+        </Col>
+      </Row>
       <Divider style={{ margin: "8px 0" }} />
       <Table
         size="middle"
@@ -221,6 +222,7 @@ const BannerTab = () => {
         loading={loading}
         columns={columns}
         dataSource={banners}
+        scroll={{ x: 800 }}
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
@@ -245,7 +247,8 @@ const BannerTab = () => {
         confirmLoading={isSubmitting}
         okText={editing ? "Lưu" : "Tạo mới"}
         cancelText="Huỷ"
-        width={700}
+        width={Math.min(700, window.innerWidth - 40)}
+        style={{ maxWidth: "calc(100vw - 40px)" }}
       >
         <Form form={form} layout="vertical">
           <Form.Item label="Ảnh banner">
@@ -258,12 +261,12 @@ const BannerTab = () => {
               fileList={[]}
               beforeUpload={(file) => {
                 if (!file.type.startsWith("image/")) {
-                  message.error("Vui lòng chọn file ảnh!");
+                  error("Vui lòng chọn file ảnh!");
                   return false;
                 }
                 const isLt5M = file.size / 1024 / 1024 < 5;
                 if (!isLt5M) {
-                  message.error("Ảnh phải nhỏ hơn 5MB!");
+                  error("Ảnh phải nhỏ hơn 5MB!");
                   return false;
                 }
                 const reader = new FileReader();
@@ -362,6 +365,7 @@ const NewsTab = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFileName, setImageFileName] = useState(null);
   const [form] = Form.useForm();
+  const { success, error } = useToast();
 
   const fetchData = async () => {
     setLoading(true);
@@ -377,7 +381,7 @@ const NewsTab = () => {
         : [];
       setItems(filtered);
     } catch (e) {
-      message.error("Tải tin tức thất bại");
+      error("Tải tin tức thất bại");
     } finally {
       setLoading(false);
     }
@@ -417,9 +421,7 @@ const NewsTab = () => {
 
       if (editing) await updateNewsApi(editing.id, payload);
       else await createNewsApi(payload);
-      message.success(
-        editing ? "Cập nhật tin thành công" : "Tạo tin thành công"
-      );
+      success(editing ? "Cập nhật tin thành công" : "Tạo tin thành công");
       setIsModalOpen(false);
       setEditing(null);
       form.resetFields();
@@ -428,7 +430,7 @@ const NewsTab = () => {
       fetchData();
     } catch (e) {
       if (e && e.errorFields) return;
-      message.error("Lưu tin thất bại");
+      error("Lưu tin thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -437,10 +439,10 @@ const NewsTab = () => {
   const handleDelete = async (id) => {
     try {
       await deleteNewsApi(id);
-      message.success("Đã xoá tin");
+      success("Đã xoá tin");
       fetchData();
     } catch {
-      message.error("Xoá tin thất bại");
+      error("Xoá tin thất bại");
     }
   };
 
@@ -513,33 +515,33 @@ const NewsTab = () => {
 
   return (
     <Card>
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          alignItems: "center",
-          flexWrap: "wrap",
-          marginBottom: 12,
-        }}
-      >
-        <Input.Search
-          placeholder="Tìm theo tiêu đề"
-          allowClear
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onSearch={fetchData}
-          style={{ width: 320 }}
-        />
-        <Button onClick={fetchData}>Tải lại</Button>
-        <div style={{ flex: 1 }} />
-        <Button
-          type="primary"
-          style={{ background: "#d93025" }}
-          onClick={openCreate}
-        >
-          + Thêm tin tức
-        </Button>
-      </div>
+      <Row gutter={[8, 8]} align="middle" className="mb-3">
+        <Col xs={24} sm={24} md={8}>
+          <Input.Search
+            placeholder="Tìm theo tiêu đề"
+            allowClear
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onSearch={fetchData}
+            className="w-full"
+          />
+        </Col>
+        <Col xs={12} sm={6} md={3}>
+          <Button onClick={fetchData} className="w-full">
+            Tải lại
+          </Button>
+        </Col>
+        <Col xs={12} sm={6} md={5}>
+          <Button
+            type="primary"
+            style={{ background: "#d93025" }}
+            onClick={openCreate}
+            className="w-full"
+          >
+            + Thêm tin tức
+          </Button>
+        </Col>
+      </Row>
       <Divider style={{ margin: "8px 0" }} />
       <Table
         size="middle"
@@ -547,6 +549,7 @@ const NewsTab = () => {
         loading={loading}
         columns={columns}
         dataSource={items}
+        scroll={{ x: 800 }}
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
@@ -571,7 +574,8 @@ const NewsTab = () => {
         confirmLoading={isSubmitting}
         okText={editing ? "Lưu" : "Tạo mới"}
         cancelText="Huỷ"
-        width={700}
+        width={Math.min(700, window.innerWidth - 40)}
+        style={{ maxWidth: "calc(100vw - 40px)" }}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -603,12 +607,12 @@ const NewsTab = () => {
               fileList={[]}
               beforeUpload={(file) => {
                 if (!file.type.startsWith("image/")) {
-                  message.error("Vui lòng chọn file ảnh!");
+                  error("Vui lòng chọn file ảnh!");
                   return false;
                 }
                 const isLt5M = file.size / 1024 / 1024 < 5;
                 if (!isLt5M) {
-                  message.error("Ảnh phải nhỏ hơn 5MB!");
+                  error("Ảnh phải nhỏ hơn 5MB!");
                   return false;
                 }
                 const reader = new FileReader();
