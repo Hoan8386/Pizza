@@ -15,9 +15,10 @@ import {
   Typography,
   message,
   Switch,
+  Upload,
 } from "antd";
 import { AdminPageHeader } from "../../components/admin/PageHeader";
-import { FileTextOutlined } from "@ant-design/icons";
+import { FileTextOutlined, PlusOutlined } from "@ant-design/icons";
 
 import {
   getAllBannerApi,
@@ -38,6 +39,8 @@ const BannerTab = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFileName, setImageFileName] = useState(null);
   const [form] = Form.useForm();
 
   const fetchData = async () => {
@@ -67,11 +70,16 @@ const BannerTab = () => {
   const openCreate = () => {
     setEditing(null);
     form.resetFields();
+    setImagePreview(null);
+    setImageFileName(null);
     setIsModalOpen(true);
   };
   const openEdit = (record) => {
     setEditing(record);
+    form.resetFields();
     form.setFieldsValue(record);
+    setImagePreview(null);
+    setImageFileName(null);
     setIsModalOpen(true);
   };
 
@@ -80,6 +88,14 @@ const BannerTab = () => {
       const values = await form.validateFields();
       setIsSubmitting(true);
       const payload = { ...values, active: !!values.active };
+
+      // Chỉ truyền fileName nếu có ảnh mới được chọn
+      if (imageFileName) {
+        payload.fileName = imageFileName;
+        payload.image_url = imageFileName;
+        payload.position = "homepage_top";
+      }
+
       if (editing) await updateBannerApi(editing.id, payload);
       else await createBannerApi(payload);
       message.success(
@@ -88,6 +104,8 @@ const BannerTab = () => {
       setIsModalOpen(false);
       setEditing(null);
       form.resetFields();
+      setImagePreview(null);
+      setImageFileName(null);
       fetchData();
     } catch (e) {
       if (e && e.errorFields) return;
@@ -117,22 +135,32 @@ const BannerTab = () => {
     {
       title: "Ảnh",
       dataIndex: "image_url",
+      width: 120,
       render: (url) => (
-        <img
-          src={url}
-          style={{ width: 80, height: 48, objectFit: "cover", borderRadius: 6 }}
-        />
+        <div
+          style={{
+            width: 100,
+            height: 60,
+            borderRadius: "8px",
+            overflow: "hidden",
+            background: "#f0f0f0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid #e0e0e0",
+          }}
+        >
+          <img
+            src={`http://localhost:8000/images${url || ""}`}
+            alt="banner"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={(e) => {
+              e.currentTarget.src =
+                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Crect fill='%23f0f0f0' width='100' height='60'/%3E%3Ctext x='50' y='30' text-anchor='middle' dy='.3em' fill='%23999' font-size='12'%3ENo Image%3C/text%3E%3C/svg%3E";
+            }}
+          />
+        </div>
       ),
-    },
-    { title: "Liên kết", dataIndex: "link", ellipsis: true },
-    { title: "Vị trí", dataIndex: "position" },
-    {
-      title: "Kích hoạt",
-      dataIndex: "active",
-      render: (v) => (
-        <Tag color={v ? "green" : "default"}>{v ? "Bật" : "Tắt"}</Tag>
-      ),
-      width: 100,
     },
     {
       title: "Thao tác",
@@ -210,38 +238,112 @@ const BannerTab = () => {
         onCancel={() => {
           setIsModalOpen(false);
           setEditing(null);
+          setImagePreview(null);
+          setImageFileName(null);
         }}
         onOk={handleSubmit}
         confirmLoading={isSubmitting}
         okText={editing ? "Lưu" : "Tạo mới"}
         cancelText="Huỷ"
+        width={700}
       >
         <Form form={form} layout="vertical">
-          <Form.Item
-            label="Ảnh (URL)"
-            name="image_url"
-            rules={[{ required: true, message: "Nhập URL ảnh" }]}
-          >
-            <Input placeholder="https://..." />
-          </Form.Item>
-          <Form.Item label="Liên kết" name="link">
-            <Input placeholder="https://..." />
-          </Form.Item>
-          <Form.Item
-            label="Vị trí"
-            name="position"
-            rules={[{ required: true, message: "Chọn vị trí" }]}
-          >
-            <Select
-              options={[
-                { label: "homepage_top", value: "homepage_top" },
-                { label: "homepage_bottom", value: "homepage_bottom" },
-                { label: "product_page", value: "product_page" },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Kích hoạt" name="active" valuePropName="checked">
-            <Switch />
+          <Form.Item label="Ảnh banner">
+            <Upload
+              key={isModalOpen ? "edit-banner-upload" : "create-banner-upload"}
+              name="file"
+              listType="picture-card"
+              maxCount={1}
+              accept="image/*"
+              fileList={[]}
+              beforeUpload={(file) => {
+                if (!file.type.startsWith("image/")) {
+                  message.error("Vui lòng chọn file ảnh!");
+                  return false;
+                }
+                const isLt5M = file.size / 1024 / 1024 < 5;
+                if (!isLt5M) {
+                  message.error("Ảnh phải nhỏ hơn 5MB!");
+                  return false;
+                }
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                  setImagePreview(ev.target.result);
+                  const filePath = `/banners/${file.name}`;
+                  setImageFileName(filePath);
+                  form.setFieldValue("image_url", filePath);
+                };
+                reader.readAsDataURL(file);
+                return false;
+              }}
+              onRemove={() => {
+                setImagePreview(null);
+                setImageFileName(null);
+                form.setFieldValue("image_url", null);
+              }}
+            >
+              {!imagePreview && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+                </div>
+              )}
+            </Upload>
+            {imagePreview && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  background: "#f5f5f5",
+                  borderRadius: 8,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: "120px",
+                }}
+              >
+                <img
+                  src={imagePreview}
+                  alt="preview"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "200px",
+                    borderRadius: 8,
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
+            )}
+            {editing && !imagePreview && form.getFieldValue("image_url") && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  background: "#f5f5f5",
+                  borderRadius: 8,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: "120px",
+                }}
+              >
+                <img
+                  src={`http://localhost:8000/images${form.getFieldValue(
+                    "image_url"
+                  )}`}
+                  alt="current"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "200px",
+                    borderRadius: 8,
+                    objectFit: "contain",
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
           </Form.Item>
         </Form>
       </Modal>
@@ -257,6 +359,8 @@ const NewsTab = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFileName, setImageFileName] = useState(null);
   const [form] = Form.useForm();
 
   const fetchData = async () => {
@@ -286,11 +390,16 @@ const NewsTab = () => {
   const openCreate = () => {
     setEditing(null);
     form.resetFields();
+    setImagePreview(null);
+    setImageFileName(null);
     setIsModalOpen(true);
   };
   const openEdit = (record) => {
     setEditing(record);
+    form.resetFields();
     form.setFieldsValue(record);
+    setImagePreview(null);
+    setImageFileName(null);
     setIsModalOpen(true);
   };
 
@@ -298,14 +407,24 @@ const NewsTab = () => {
     try {
       const values = await form.validateFields();
       setIsSubmitting(true);
-      if (editing) await updateNewsApi(editing.id, values);
-      else await createNewsApi(values);
+      const payload = { ...values };
+
+      // Chỉ truyền fileName nếu có ảnh mới được chọn
+      if (imageFileName) {
+        payload.fileName = imageFileName;
+        payload.image_url = imageFileName;
+      }
+
+      if (editing) await updateNewsApi(editing.id, payload);
+      else await createNewsApi(payload);
       message.success(
         editing ? "Cập nhật tin thành công" : "Tạo tin thành công"
       );
       setIsModalOpen(false);
       setEditing(null);
       form.resetFields();
+      setImagePreview(null);
+      setImageFileName(null);
       fetchData();
     } catch (e) {
       if (e && e.errorFields) return;
@@ -332,9 +451,43 @@ const NewsTab = () => {
       render: (_, __, index) =>
         (pagination.current - 1) * pagination.pageSize + index + 1,
     },
+    {
+      title: "Ảnh",
+      dataIndex: "image_url",
+      width: 100,
+      render: (url) => (
+        <div
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: "8px",
+            overflow: "hidden",
+            background: "#f0f0f0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid #e0e0e0",
+          }}
+        >
+          <img
+            src={`http://localhost:8000/images${url || ""}`}
+            alt="news"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={(e) => {
+              e.currentTarget.src =
+                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23f0f0f0' width='80' height='80'/%3E%3Ctext x='40' y='40' text-anchor='middle' dy='.3em' fill='%23999' font-size='10'%3ENo Image%3C/text%3E%3C/svg%3E";
+            }}
+          />
+        </div>
+      ),
+    },
     { title: "Tiêu đề", dataIndex: "title", ellipsis: true },
-    { title: "Tác giả", dataIndex: "author", width: 160 },
-    { title: "Ngày", dataIndex: "published_at", width: 180 },
+    {
+      title: "Nội dung",
+      dataIndex: "content",
+      ellipsis: true,
+      width: 250,
+    },
     {
       title: "Thao tác",
       width: 160,
@@ -406,37 +559,136 @@ const NewsTab = () => {
       />
 
       <Modal
-        title={editing ? "Cập nhật tin" : "Thêm tin"}
+        title={editing ? "Cập nhật tin tức" : "Thêm tin tức"}
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
           setEditing(null);
+          setImagePreview(null);
+          setImageFileName(null);
         }}
         onOk={handleSubmit}
         confirmLoading={isSubmitting}
         okText={editing ? "Lưu" : "Tạo mới"}
         cancelText="Huỷ"
+        width={700}
       >
         <Form form={form} layout="vertical">
           <Form.Item
             label="Tiêu đề"
             name="title"
-            rules={[{ required: true, message: "Nhập tiêu đề" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
           >
-            <Input />
-          </Form.Item>
-          <Form.Item label="Tác giả" name="author">
-            <Input />
+            <Input placeholder="Ví dụ: Khuyến mãi 50% cuối tuần" />
           </Form.Item>
           <Form.Item
             label="Nội dung"
             name="content"
-            rules={[{ required: true, message: "Nhập nội dung" }]}
+            rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
           >
-            <Input.TextArea rows={4} />
+            <Input.TextArea
+              rows={4}
+              placeholder="Nhập nội dung chi tiết cho bài viết"
+              maxLength={500}
+              showCount
+            />
           </Form.Item>
-          <Form.Item label="Ảnh (URL)" name="image_url">
-            <Input placeholder="https://..." />
+          <Form.Item label="Ảnh tin tức">
+            <Upload
+              key={isModalOpen ? "edit-news-upload" : "create-news-upload"}
+              name="file"
+              listType="picture-card"
+              maxCount={1}
+              accept="image/*"
+              fileList={[]}
+              beforeUpload={(file) => {
+                if (!file.type.startsWith("image/")) {
+                  message.error("Vui lòng chọn file ảnh!");
+                  return false;
+                }
+                const isLt5M = file.size / 1024 / 1024 < 5;
+                if (!isLt5M) {
+                  message.error("Ảnh phải nhỏ hơn 5MB!");
+                  return false;
+                }
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                  setImagePreview(ev.target.result);
+                  const filePath = `/news/${file.name}`;
+                  setImageFileName(filePath);
+                  form.setFieldValue("image_url", filePath);
+                };
+                reader.readAsDataURL(file);
+                return false;
+              }}
+              onRemove={() => {
+                setImagePreview(null);
+                setImageFileName(null);
+                form.setFieldValue("image_url", null);
+              }}
+            >
+              {!imagePreview && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+                </div>
+              )}
+            </Upload>
+            {imagePreview && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  background: "#f5f5f5",
+                  borderRadius: 8,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: "120px",
+                }}
+              >
+                <img
+                  src={imagePreview}
+                  alt="preview"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "200px",
+                    borderRadius: 8,
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
+            )}
+            {editing && !imagePreview && form.getFieldValue("image_url") && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  background: "#f5f5f5",
+                  borderRadius: 8,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: "120px",
+                }}
+              >
+                <img
+                  src={`http://localhost:8000/images${form.getFieldValue(
+                    "image_url"
+                  )}`}
+                  alt="current"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "200px",
+                    borderRadius: 8,
+                    objectFit: "contain",
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
           </Form.Item>
         </Form>
       </Modal>

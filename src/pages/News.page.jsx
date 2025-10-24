@@ -138,7 +138,7 @@ const NewsPage = () => {
                     <div className="relative h-56 bg-gradient-to-br from-orange-100 to-red-100 overflow-hidden">
                       <img
                         alt={item.title}
-                        src={`http://localhost:8000${item.image_url}`}
+                        src={`http://localhost:8000/images/${item.image_url}`}
                         className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500"
                         onError={(e) => {
                           e.target.style.display = "none";
