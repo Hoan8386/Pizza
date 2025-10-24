@@ -15,8 +15,8 @@ import {
   Col,
   Switch,
   DatePicker,
+  Divider,
 } from "antd";
-import { AdminPageHeader } from "../../components/admin/PageHeader";
 import {
   PlusOutlined,
   EditOutlined,
@@ -262,13 +262,10 @@ const VoucherAdmin = () => {
   ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <AdminPageHeader title="Quản Lý Voucher" icon={<PlusOutlined />} />
-
-      <Card className="shadow-sm">
-        {/* Search and Create */}
-        <Row gutter={16} className="mb-6">
-          <Col xs={24} sm={16}>
+    <div className="p-6">
+      <Card style={{ borderRadius: "12px" }}>
+        <Row gutter={[8, 8]} align="middle" className="mb-3">
+          <Col xs={24} sm={24} md={10}>
             <Input.Search
               placeholder="Tìm kiếm mã voucher..."
               value={keyword}
@@ -277,20 +274,26 @@ const VoucherAdmin = () => {
                 setPagination({ ...pagination, current: 1 });
               }}
               allowClear
-              size="large"
+              className="w-full"
             />
           </Col>
-          <Col xs={24} sm={8} className="text-right">
+          <Col xs={12} sm={6} md={3}>
+            <Button onClick={fetchData} className="w-full">
+              Tải lại
+            </Button>
+          </Col>
+          <Col xs={12} sm={6} md={5}>
             <Button
               type="primary"
-              size="large"
-              icon={<PlusOutlined />}
+              style={{ background: "#d93025" }}
               onClick={openCreate}
+              className="w-full"
             >
-              Thêm Voucher
+              + Thêm voucher
             </Button>
           </Col>
         </Row>
+        <Divider style={{ margin: "8px 0" }} />
 
         {/* Table */}
         <Table

@@ -12,7 +12,6 @@ import {
   Col,
   Divider,
 } from "antd";
-import { AdminPageHeader } from "../../components/admin/PageHeader";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   getAllCrusts,
@@ -162,13 +161,10 @@ const CrustAdmin = () => {
   );
 
   return (
-    <div>
-      <AdminPageHeader title="Quản Lý Đế Bánh" />
-
-      <Card className="shadow-sm" style={{ marginTop: "20px" }}>
-        {/* Search & Filter */}
-        <Row gutter={[16, 16]} className="mb-4">
-          <Col xs={24} sm={12} md={8}>
+    <div className="p-6">
+      <Card style={{ borderRadius: "12px" }}>
+        <Row gutter={[8, 8]} align="middle" className="mb-3">
+          <Col xs={24} sm={24} md={8}>
             <Input.Search
               placeholder="Tìm kiếm tên đế..."
               value={keyword}
@@ -177,21 +173,26 @@ const CrustAdmin = () => {
                 setPagination({ ...pagination, current: 1 });
               }}
               allowClear
+              className="w-full"
             />
           </Col>
-          <Col xs={24} sm={12} md={16} style={{ textAlign: "right" }}>
+          <Col xs={12} sm={6} md={3}>
+            <Button onClick={fetchData} className="w-full">
+              Tải lại
+            </Button>
+          </Col>
+          <Col xs={12} sm={6} md={5}>
             <Button
               type="primary"
-              icon={<PlusOutlined />}
+              style={{ background: "#d93025" }}
               onClick={openCreate}
-              size="large"
+              className="w-full"
             >
-              Thêm Đế Bánh
+              + Thêm đế bánh
             </Button>
           </Col>
         </Row>
-
-        <Divider className="my-2" />
+        <Divider style={{ margin: "8px 0" }} />
 
         {/* Table */}
         <Table

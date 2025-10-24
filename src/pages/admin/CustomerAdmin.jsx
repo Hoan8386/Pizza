@@ -14,7 +14,6 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { AdminPageHeader } from "../../components/admin/PageHeader";
 import { TeamOutlined } from "@ant-design/icons";
 import {
   getUsersApi,
@@ -142,118 +141,107 @@ const CustomerAdmin = () => {
   ];
 
   return (
-    <div className="p-4">
-      <div className="space-y-4">
-        <AdminPageHeader
-          icon={<TeamOutlined style={{ color: "#c8102e" }} />}
-          title="Quản lý Khách hàng"
-          description="Quản lý khách hàng của cửa hàng"
-          color="#c8102e"
-          image="👥"
-        />
-        <div className="p-6 space-y-6">
-          <Card style={{ borderRadius: "12px" }}>
-            <Row gutter={[8, 8]} align="middle" className="mb-3">
-              <Col xs={24} sm={24} md={8}>
-                <Input.Search
-                  placeholder="Tìm theo tên/email"
-                  allowClear
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  onSearch={fetchData}
-                  className="w-full"
-                />
-              </Col>
-              <Col xs={12} sm={6} md={3}>
-                <Button onClick={fetchData} className="w-full">
-                  Tải lại
-                </Button>
-              </Col>
-              <Col xs={12} sm={6} md={5}>
-                <Button
-                  type="primary"
-                  style={{ background: "#d93025" }}
-                  onClick={openCreate}
-                  className="w-full"
-                >
-                  + Thêm khách
-                </Button>
-              </Col>
-            </Row>
-            <Divider style={{ margin: "8px 0" }} />
-            <Table
-              size="middle"
-              rowKey={(r) => r.id}
-              loading={loading}
-              columns={columns}
-              dataSource={users}
-              scroll={{ x: 800 }}
-              pagination={{
-                current: pagination.current,
-                pageSize: pagination.pageSize,
-                showSizeChanger: false,
-                showTotal: (t) => `${t} khách hàng`,
-              }}
-              onChange={(pg) =>
-                setPagination({ current: pg.current, pageSize: pg.pageSize })
-              }
+    <div className="p-6">
+      <Card style={{ borderRadius: "12px" }}>
+        <Row gutter={[8, 8]} align="middle" className="mb-3">
+          <Col xs={24} sm={24} md={8}>
+            <Input.Search
+              placeholder="Tìm theo tên/email"
+              allowClear
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onSearch={fetchData}
+              className="w-full"
             />
-          </Card>
+          </Col>
+          <Col xs={12} sm={6} md={3}>
+            <Button onClick={fetchData} className="w-full">
+              Tải lại
+            </Button>
+          </Col>
+          <Col xs={12} sm={6} md={5}>
+            <Button
+              type="primary"
+              style={{ background: "#d93025" }}
+              onClick={openCreate}
+              className="w-full"
+            >
+              + Thêm khách
+            </Button>
+          </Col>
+        </Row>
+        <Divider style={{ margin: "8px 0" }} />
+        <Table
+          size="middle"
+          rowKey={(r) => r.id}
+          loading={loading}
+          columns={columns}
+          dataSource={users}
+          scroll={{ x: 800 }}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            showSizeChanger: false,
+            showTotal: (t) => `${t} khách hàng`,
+          }}
+          onChange={(pg) =>
+            setPagination({ current: pg.current, pageSize: pg.pageSize })
+          }
+        />
+      </Card>
 
-          <Modal
-            title={editing ? "Cập nhật khách hàng" : "Thêm khách hàng"}
-            open={isModalOpen}
-            onCancel={() => {
-              setIsModalOpen(false);
-              setEditing(null);
-            }}
-            onOk={handleSubmit}
-            confirmLoading={isSubmitting}
-            okText={editing ? "Lưu" : "Tạo mới"}
-            width={Math.min(600, window.innerWidth - 40)}
-            style={{ maxWidth: "calc(100vw - 40px)" }}
-            cancelText="Huỷ"
+      <Modal
+        title={editing ? "Cập nhật khách hàng" : "Thêm khách hàng"}
+        open={isModalOpen}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditing(null);
+        }}
+        onOk={handleSubmit}
+        confirmLoading={isSubmitting}
+        okText={editing ? "Lưu" : "Tạo mới"}
+        width={Math.min(600, window.innerWidth - 40)}
+        style={{ maxWidth: "calc(100vw - 40px)" }}
+        cancelText="Huỷ"
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="Họ tên"
+            name="full_name"
+            rules={[{ required: true, message: "Nhập họ tên" }]}
           >
-            <Form form={form} layout="vertical">
-              <Form.Item
-                label="Họ tên"
-                name="full_name"
-                rules={[{ required: true, message: "Nhập họ tên" }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  {
-                    required: true,
-                    type: "email",
-                    message: "Email không hợp lệ",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-              {!editing && (
-                <Form.Item
-                  label="Mật khẩu"
-                  name="password"
-                  rules={[{ required: true, message: "Nhập mật khẩu" }]}
-                >
-                  <Input.Password />
-                </Form.Item>
-              )}
-              <Form.Item label="SĐT" name="phone">
-                <Input />
-              </Form.Item>
-              <Form.Item label="Địa chỉ" name="address">
-                <Input />
-              </Form.Item>
-            </Form>
-          </Modal>
-        </div>
-      </div>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "Email không hợp lệ",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          {!editing && (
+            <Form.Item
+              label="Mật khẩu"
+              name="password"
+              rules={[{ required: true, message: "Nhập mật khẩu" }]}
+            >
+              <Input.Password />
+            </Form.Item>
+          )}
+          <Form.Item label="SĐT" name="phone">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Địa chỉ" name="address">
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

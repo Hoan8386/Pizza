@@ -18,7 +18,6 @@ import {
   Switch,
   Upload,
 } from "antd";
-import { AdminPageHeader } from "../../components/admin/PageHeader";
 import { FileTextOutlined, PlusOutlined } from "@ant-design/icons";
 
 import {
@@ -136,7 +135,7 @@ const BannerTab = () => {
     {
       title: "Ảnh",
       dataIndex: "image_url",
-      width: 120,
+      width: 500,
       render: (url) => (
         <div
           style={{
@@ -166,6 +165,7 @@ const BannerTab = () => {
     {
       title: "Thao tác",
       width: 160,
+      fixed: "right",
       render: (_, r) => (
         <Space>
           <Button size="small" onClick={() => openEdit(r)}>
@@ -702,15 +702,8 @@ const NewsTab = () => {
 
 const ContentAdmin = () => {
   return (
-    <div className="p-4">
+    <div className="p-6">
       <div className="space-y-4">
-        <AdminPageHeader
-          icon={<FileTextOutlined style={{ color: "#c8102e" }} />}
-          title="Quản lý Nội dung"
-          description="Quản lý nội dung hệ thống"
-          color="#c8102e"
-          image="📋"
-        />
         <Tabs
           defaultActiveKey="banners"
           items={[

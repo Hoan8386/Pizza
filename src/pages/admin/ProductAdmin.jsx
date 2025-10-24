@@ -9,7 +9,6 @@ import {
   updateProductApi,
   deleteProductApi,
 } from "../../services/api.service";
-import { AdminPageHeader } from "../../components/admin/PageHeader";
 import {
   ShoppingOutlined,
   AppstoreOutlined,
@@ -38,7 +37,6 @@ import { useToast } from "../../hooks/useToast";
 
 const ProductAdmin = () => {
   const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState("table"); // "table" or "grid"
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [sizes, setSizes] = useState([]);
@@ -303,13 +301,6 @@ const ProductAdmin = () => {
 
   return (
     <div className="p-6">
-      <AdminPageHeader
-        icon={<ShoppingOutlined style={{ color: "#c8102e" }} />}
-        title="Quản lý Sản phẩm"
-        description="Quản lý toàn bộ sản phẩm của cửa hàng"
-        color="#c8102e"
-        image="🍕"
-      />
       <Card style={{ borderRadius: "12px" }}>
         <Row gutter={[8, 8]} align="middle" className="mb-3">
           <Col xs={24} sm={24} md={10}>
@@ -322,159 +313,41 @@ const ProductAdmin = () => {
               className="w-full"
             />
           </Col>
-          <Col xs={12} sm={6} md={4}>
+          <Col xs={12} sm={6} md={3}>
             <Button onClick={() => fetchProducts(keyword)} className="w-full">
               Tải lại
             </Button>
           </Col>
-          <Col xs={12} sm={18} md={10} className="flex gap-2">
-            <Button
-              icon={<BarsOutlined />}
-              type={viewMode === "table" ? "primary" : "default"}
-              onClick={() => setViewMode("table")}
-              className="flex-1"
-            >
-              Danh sách
-            </Button>
-            <Button
-              icon={<AppstoreOutlined />}
-              type={viewMode === "grid" ? "primary" : "default"}
-              onClick={() => setViewMode("grid")}
-              className="flex-1"
-            >
-              Lưới
-            </Button>
+          <Col xs={12} sm={6} md={5}>
             <Button
               type="primary"
               style={{ background: "#d93025" }}
               onClick={openCreate}
-              className="flex-1"
+              className="w-full"
             >
-              + Thêm
+              + Thêm sản phẩm
             </Button>
           </Col>
         </Row>
         <Divider style={{ margin: "8px 0" }} />
 
-        {viewMode === "table" ? (
-          <Table
-            size="middle"
-            rowKey={(r) => r.id}
-            loading={loading}
-            columns={columns}
-            dataSource={products}
-            scroll={{ x: 800 }}
-            pagination={{
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              showSizeChanger: false,
-              showTotal: (t) => `${t} sản phẩm`,
-            }}
-            onChange={(pg) =>
-              setPagination({ current: pg.current, pageSize: pg.pageSize })
-            }
-          />
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-              gap: 16,
-            }}
-          >
-            {products.map((product) => (
-              <Card
-                key={product.id}
-                hoverable
-                style={{ borderRadius: "12px", overflow: "hidden" }}
-                cover={
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "200px",
-                      background: "#f0f0f0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <img
-                      src={`http://localhost:8000/images${
-                        product.image_url || ""
-                      }`}
-                      alt={product.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f0f0f0' width='100' height='100'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='%23999' font-size='12'%3ENo Image%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
-                }
-              >
-                <Card.Meta
-                  title={
-                    <div
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {product.name}
-                    </div>
-                  }
-                  description={
-                    <div>
-                      <div
-                        style={{ fontSize: 12, color: "#666", marginBottom: 8 }}
-                      >
-                        {product.category?.name || "Không có danh mục"}
-                      </div>
-                      <Space size={4} wrap>
-                        <Tag color="blue">
-                          {product.product_variants?.length || 0} loại
-                        </Tag>
-                        <Tag color="green">
-                          từ{" "}
-                          {Math.min(
-                            ...(product.product_variants?.map((v) =>
-                              Number(v.price || 0)
-                            ) || [0])
-                          ).toLocaleString()}
-                          ₫
-                        </Tag>
-                      </Space>
-                    </div>
-                  }
-                />
-                <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-                  <Button size="small" block onClick={() => openEdit(product)}>
-                    Sửa
-                  </Button>
-                  <Popconfirm
-                    title="Xoá sản phẩm"
-                    description={`Bạn chắc muốn xoá "${product.name}"?`}
-                    okText="Xoá"
-                    cancelText="Huỷ"
-                    onConfirm={() => handleDelete(product.id)}
-                  >
-                    <Button size="small" danger block>
-                      Xoá
-                    </Button>
-                  </Popconfirm>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
+        <Table
+          size="middle"
+          rowKey={(r) => r.id}
+          loading={loading}
+          columns={columns}
+          dataSource={products}
+          scroll={{ x: 800 }}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            showSizeChanger: false,
+            showTotal: (t) => `${t} sản phẩm`,
+          }}
+          onChange={(pg) =>
+            setPagination({ current: pg.current, pageSize: pg.pageSize })
+          }
+        />
       </Card>
 
       <Modal

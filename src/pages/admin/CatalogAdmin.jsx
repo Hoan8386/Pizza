@@ -22,7 +22,6 @@ import {
   updateCategoryApi,
   deleteCategoryApi,
 } from "../../services/api.service";
-import { AdminPageHeader } from "../../components/admin/PageHeader";
 import { AppstoreOutlined, PlusOutlined } from "@ant-design/icons";
 import { useToast } from "../../hooks/useToast";
 
@@ -195,36 +194,29 @@ const CatalogAdmin = () => {
       title: "Thao tác",
       render: (_, r) => (
         <Space size="small">
-          <Button size="small" onClick={() => openEdit(r)}>
-            Sửa
+          <Button size="small" type="primary" onClick={() => openEdit(r)}>
+            ✏️ Sửa
           </Button>
           <Popconfirm
             title="Xoá danh mục"
+            description="Bạn chắc chắn muốn xóa danh mục này?"
             onConfirm={() => handleDelete(r.id)}
             okText="Xoá"
             cancelText="Huỷ"
           >
             <Button size="small" danger>
-              Xoá
+              🗑️ Xoá
             </Button>
           </Popconfirm>
         </Space>
       ),
-      width: 140,
-      responsive: ["xs"],
+      width: 180,
+      fixed: "right",
     },
   ];
 
   return (
     <div className="p-6">
-      <AdminPageHeader
-        icon={<AppstoreOutlined style={{ color: "#c8102e" }} />}
-        title="Quản lý Danh mục"
-        description="Quản lý các danh mục sản phẩm của cửa hàng"
-        color="#c8102e"
-        image="📂"
-      />
-
       <Card style={{ borderRadius: "12px" }}>
         <Row gutter={[8, 8]} align="middle" className="mb-3">
           <Col xs={24} sm={24} md={8} lg={6}>
