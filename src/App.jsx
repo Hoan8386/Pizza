@@ -29,6 +29,7 @@ import OrderAdmin from "./pages/admin/OrderAdmin";
 import CatalogAdmin from "./pages/admin/CatalogAdmin";
 import CustomerAdmin from "./pages/admin/CustomerAdmin";
 import ContentAdmin from "./pages/admin/ContentAdmin";
+import VoucherAdmin from "./pages/admin/VoucherAdmin";
 import ProtectedRoute from "./share/ProtectedRoute";
 import NewsPage from "./pages/News.page";
 import "./styles/admin.css";
@@ -44,6 +45,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   ShoppingOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 
 const { Sider, Content } = Layout;
@@ -113,6 +115,11 @@ const LayoutAdmin = () => {
       icon: <FileTextOutlined />,
       label: "Nội dung",
     },
+    {
+      key: "/admin/vouchers",
+      icon: <GiftOutlined />,
+      label: "Voucher",
+    },
   ];
 
   const getSelectedKey = () => {
@@ -141,6 +148,7 @@ const LayoutAdmin = () => {
     if (path.includes("orders")) return "Đơn hàng";
     if (path.includes("customers")) return "Khách hàng";
     if (path.includes("content")) return "Nội dung";
+    if (path.includes("vouchers")) return "Quản Lý Voucher";
     return "Admin";
   };
 
@@ -481,6 +489,7 @@ function App() {
         { path: "orders", element: <OrderAdmin /> },
         { path: "customers", element: <CustomerAdmin /> },
         { path: "content", element: <ContentAdmin /> },
+        { path: "vouchers", element: <VoucherAdmin /> },
         { path: "catalogs", element: <CatalogAdmin /> },
 
         // { path: "dish", element: <TableDish /> },

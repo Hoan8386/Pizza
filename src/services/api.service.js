@@ -290,6 +290,27 @@ const getAllNews =() =>{
      return axios.get(URL_BACKEND);
 }
 
+// Voucher/Coupon CRUD
+const getAllVouchersApi = () => {
+    const URL_BACKEND = "/api/coupons";
+    return axios.get(URL_BACKEND);
+};
+
+const createVoucherApi = (payload) => {
+    const URL_BACKEND = "/api/coupons";
+    return axios.post(URL_BACKEND, payload);
+};
+
+const updateVoucherApi = (id, payload) => {
+    const URL_BACKEND = `/api/coupons/${id}`;
+    return axios.put(URL_BACKEND, payload);
+};
+
+const deleteVoucherApi = (id) => {
+    const URL_BACKEND = `/api/coupons/${id}`;
+    return axios.delete(URL_BACKEND);
+};
+
 export {
     getAllProducts,
     createProductApi,
@@ -341,5 +362,9 @@ export {
     createNewsApi,
     updateNewsApi,
     deleteNewsApi,
-    getAllNews
+    getAllNews,
+    getAllVouchersApi,
+    createVoucherApi,
+    updateVoucherApi,
+    deleteVoucherApi
 };

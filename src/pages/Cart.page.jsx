@@ -109,7 +109,7 @@ export const CartPage = () => {
 
       // Kiểm tra status code 400 hoặc valid === false
       if (res.statusCode === 400 || res.valid === false) {
-        toast.error("Áp dụng mã giảm giá thất bại");
+        toast.error(res.message);
       } else if (res.data && res.data.valid === true) {
         toast.success("Áp dụng mã giảm giá thành công");
         setTotalAfterDiscount(totalPrice - res.data.discount);
@@ -117,11 +117,11 @@ export const CartPage = () => {
         setCouponCode(res.data.coupon.code);
         console.log("check code ", res.data.coupon.code);
       } else {
-        toast.error("Áp dụng mã giảm giá thất bại");
+        toast.error(res.message);
       }
     } catch (error) {
       console.error("Error checking coupon:", error);
-      toast.error("Áp dụng mã giảm giá thất bại");
+      toast.error("Invalid or expired coupon");
     } finally {
       setIsLoading(false);
     }
