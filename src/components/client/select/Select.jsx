@@ -23,7 +23,7 @@ const categoryIcons = {
 const Select = (props) => {
   const { categories, activeIndex, setActiveIndex } = props;
   const scrollRef = useRef(null);
-
+  console.log("check category check props", categories);
   const scrollLeft = () => {
     scrollRef.current.scrollBy({ left: -150, behavior: "smooth" });
   };
@@ -31,8 +31,25 @@ const Select = (props) => {
   const scrollRight = () => {
     scrollRef.current.scrollBy({ left: 150, behavior: "smooth" });
   };
-  // Lấy banner của category đang active
-  const activeBanner = categories[activeIndex - 1]?.url; // giả sử categories[i].banner = URL ảnh
+
+  // Tìm category đang active theo id (activeIndex chứa id)
+  const activeCategory = Array.isArray(categories)
+    ? categories.find((c) => c.id === activeIndex) || categories[0]
+    : null;
+  const activeBanner = activeCategory?.url;
+
+  // Xây dựng đường dẫn ảnh an toàn: API trả về "/categories/xxx.webp",
+  // server thực tế lưu ảnh dưới /images + url. Nếu API trả về full URL thì dùng luôn.
+  const buildImageSrc = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    // nếu url đã có /images prefix
+    if (url.startsWith("/images")) return `http://localhost:8000${url}`;
+    // nếu url bắt đầu với /categories hoặc /... thì tiền tố /images
+    return `http://localhost:8000/images${
+      url.startsWith("/") ? "" : "/"
+    }${url}`;
+  };
   return (
     <>
       <div className="relative flex items-center">
@@ -47,9 +64,9 @@ const Select = (props) => {
           ref={scrollRef}
           className="flex w-full overflow-x-auto no-scrollbar scrollbar-hide scroll-smooth px-10"
         >
-          {categories.map((item, index) => (
+          {categories.map((item) => (
             <li
-              key={index}
+              key={item.id}
               onClick={() => setActiveIndex(item.id)}
               className={`relative cursor-pointer transition-colors duration-300 flex-none text-center min-w-[100px] ${
                 activeIndex === item.id
@@ -82,10 +99,17 @@ const Select = (props) => {
 
       {/* Banner hiển thị theo category */}
       <div className="banner mt-4 w-full h-[146px] overflow-hidden rounded-lg">
-        <img
-          src={`http://localhost:8000/images${activeBanner}`}
-          className="w-full h-full object-cover transition-all duration-500"
-        />
+        {activeBanner ? (
+          <img
+            src={buildImageSrc(activeBanner)}
+            alt={activeCategory?.name || "banner"}
+            className="w-full h-full object-cover transition-all duration-500"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+            <span className="text-gray-400">No image</span>
+          </div>
+        )}
       </div>
     </>
   );

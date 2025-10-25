@@ -100,7 +100,8 @@ const ComboAdmin = () => {
     console.log("🔵 handleSubmit called with values:", values);
     setIsSubmitting(true);
     try {
-      if (!values.items || values.items.length === 0) {
+      // Chỉ check items khi tạo mới combo, không check khi update
+      if (!editing && (!values.items || values.items.length === 0)) {
         console.log("❌ No items");
         error("Vui lòng thêm ít nhất 1 sản phẩm vào combo");
         setIsSubmitting(false);
@@ -126,7 +127,7 @@ const ComboAdmin = () => {
         is_active: values.is_active ? 1 : 0,
       };
 
-      // Chỉ thêm items khi tạo mới, không khi update
+      // Chỉ thêm items khi tạo mới, không khi update (vì update chỉ thay đổi thông tin cơ bản)
       if (!editing) {
         submitData.items = values.items.map((item) => {
           // Tìm product_variant_id từ product_id, size_id, crust_id
@@ -325,11 +326,7 @@ const ComboAdmin = () => {
       start_date: record.start_date ? dayjs(record.start_date) : null,
       end_date: record.end_date ? dayjs(record.end_date) : null,
       is_active: record.is_active === 1,
-      items:
-        record.items?.map((item) => ({
-          product_variant_id: item.product_variant_id,
-          quantity: item.quantity,
-        })) || [],
+      // Không set items khi edit vì form không hiển thị phần chọn sản phẩm
     });
     setIsModalOpen(true);
   };

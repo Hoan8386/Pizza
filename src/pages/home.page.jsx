@@ -65,7 +65,7 @@ export const HomePage = () => {
 
     fetchData();
   }, []);
-  // console.log("check category", categories);
+
   return (
     <>
       <div className="w-[1170px]  mx-auto">

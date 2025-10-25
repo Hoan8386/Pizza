@@ -31,6 +31,7 @@ import {
   Tag,
   Typography,
   Upload,
+  Tabs,
 } from "antd";
 import { Link } from "react-router-dom";
 import { useToast } from "../../hooks/useToast";
@@ -62,7 +63,7 @@ const ProductAdmin = () => {
       setCategories(catesRes.data || catesRes || []);
       setSizes(sizesRes.data || sizesRes || []);
       setCrusts(crustsRes.data || crustsRes || []);
-    } catch (e) {
+    } catch {
       // Ignore silently but keep UI usable
     }
   };
@@ -73,7 +74,7 @@ const ProductAdmin = () => {
       const res = await (q ? searchProduct(q) : getAllProducts());
       const data = res.data || res || [];
       setProducts(Array.isArray(data) ? data : []);
-    } catch (e) {
+    } catch {
       error("Tải sản phẩm thất bại");
     } finally {
       setLoading(false);
@@ -119,7 +120,7 @@ const ProductAdmin = () => {
       await deleteProductApi(id);
       success("Đã xoá sản phẩm");
       fetchProducts(keyword);
-    } catch (e) {
+    } catch {
       error("Xoá sản phẩm thất bại");
     }
   };
@@ -174,8 +175,8 @@ const ProductAdmin = () => {
       setImagePreview(null);
       setImageFileName(null);
       fetchProducts(keyword);
-    } catch (e) {
-      if (e && e.errorFields) return; // antd validation
+    } catch (err) {
+      if (err && err.errorFields) return; // antd validation
       error("Lưu sản phẩm thất bại");
     } finally {
       setIsSubmitting(false);
@@ -194,6 +195,25 @@ const ProductAdmin = () => {
     () => (crusts || []).map((c) => ({ label: c.name, value: c.id })),
     [crusts]
   );
+
+  // Nhóm sản phẩm theo category
+  const productsByCategory = useMemo(() => {
+    const grouped = {};
+    (products || []).forEach((product) => {
+      const categoryId = product.category_id || "uncategorized";
+      const categoryName = product.category?.name || "Chưa phân loại";
+
+      if (!grouped[categoryId]) {
+        grouped[categoryId] = {
+          id: categoryId,
+          name: categoryName,
+          products: [],
+        };
+      }
+      grouped[categoryId].products.push(product);
+    });
+    return Object.values(grouped);
+  }, [products]);
 
   const columns = [
     {
@@ -331,23 +351,47 @@ const ProductAdmin = () => {
         </Row>
         <Divider style={{ margin: "8px 0" }} />
 
-        <Table
-          size="middle"
-          rowKey={(r) => r.id}
-          loading={loading}
-          columns={columns}
-          dataSource={products}
-          scroll={{ x: 800 }}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            showSizeChanger: false,
-            showTotal: (t) => `${t} sản phẩm`,
-          }}
-          onChange={(pg) =>
-            setPagination({ current: pg.current, pageSize: pg.pageSize })
-          }
-        />
+        <Tabs defaultActiveKey="all" type="card">
+          <Tabs.TabPane tab="Tất cả sản phẩm" key="all">
+            <Table
+              size="middle"
+              rowKey={(r) => r.id}
+              loading={loading}
+              columns={columns}
+              dataSource={products}
+              scroll={{ x: 800 }}
+              pagination={{
+                current: pagination.current,
+                pageSize: pagination.pageSize,
+                showSizeChanger: false,
+                showTotal: (t) => `${t} sản phẩm`,
+              }}
+              onChange={(pg) =>
+                setPagination({ current: pg.current, pageSize: pg.pageSize })
+              }
+            />
+          </Tabs.TabPane>
+
+          {productsByCategory.map((category) => (
+            <Tabs.TabPane
+              tab={`${category.name} (${category.products.length})`}
+              key={category.id}
+            >
+              <Table
+                size="middle"
+                rowKey={(r) => r.id}
+                columns={columns}
+                dataSource={category.products}
+                scroll={{ x: 800 }}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: false,
+                  showTotal: (t) => `${t} sản phẩm`,
+                }}
+              />
+            </Tabs.TabPane>
+          ))}
+        </Tabs>
       </Card>
 
       <Modal
