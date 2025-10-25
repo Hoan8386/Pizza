@@ -121,10 +121,17 @@ const IndexPage = () => {
   );
 
   return (
-    <div className="p-6">
+    <div
+      className="p-6"
+      style={
+        {
+          // marginTop: "70px",
+        }
+      }
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-10">
+        {/* <div className="mb-10">
           <div className="flex items-center gap-3 mb-3">
             <div
               className="w-1.5 h-10 rounded-full"
@@ -142,10 +149,10 @@ const IndexPage = () => {
           <p className="text-gray-600 ml-5">
             Tổng quan và thống kê hoạt động của cửa hàng Pizza
           </p>
-        </div>
+        </div> */}
 
         {/* Year Filter */}
-        <div className="mb-8 flex justify-between items-center">
+        {/* <div className="mb-8 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <CalendarOutlined style={{ color: "#c8102e" }} />
             <Select
@@ -168,11 +175,11 @@ const IndexPage = () => {
               </Button>
             </Link>
           </div>
-        </div>
+        </div> */}
 
         {/* Stats Cards */}
         <Spin spinning={loading}>
-          <Row gutter={[20, 20]} className="mb-10">
+          <Row gutter={[20, 20]} className="mb-10 mt-5">
             <Col xs={24} sm={12} lg={6}>
               <StatCard
                 title="Doanh thu"
@@ -200,14 +207,6 @@ const IndexPage = () => {
                 icon={TeamOutlined}
                 color="#d84315"
                 trend={5}
-              />
-            </Col>
-            <Col xs={24} sm={12} lg={6}>
-              <StatCard
-                title="Sản phẩm"
-                value={Number(stats?.overview?.total_products || 0)}
-                icon={BarChartOutlined}
-                color="#bf360c"
               />
             </Col>
           </Row>

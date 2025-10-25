@@ -34,6 +34,7 @@ import ContentAdmin from "./pages/admin/ContentAdmin";
 import VoucherAdmin from "./pages/admin/VoucherAdmin";
 import CrustAdmin from "./pages/admin/CrustAdmin";
 import ComboAdmin from "./pages/admin/ComboAdmin";
+import FaqAdmin from "./pages/admin/FaqAdmin";
 import ProtectedRoute from "./share/ProtectedRoute";
 import NewsPage from "./pages/News.page";
 import "./styles/admin.css";
@@ -52,6 +53,7 @@ import {
   GiftOutlined,
   BgColorsOutlined,
   CoffeeOutlined,
+  QuestionCircleOutlined,
 } from "@ant-design/icons";
 
 const { Sider, Content } = Layout;
@@ -147,6 +149,11 @@ const LayoutAdmin = () => {
       icon: <CoffeeOutlined />,
       label: "Combo",
     },
+    {
+      key: "/admin/faqs",
+      icon: <QuestionCircleOutlined />,
+      label: "FAQ",
+    },
   ];
 
   const getSelectedKey = () => {
@@ -178,6 +185,7 @@ const LayoutAdmin = () => {
     if (path.includes("vouchers")) return "Quản Lý Voucher";
     if (path.includes("crusts")) return "Quản Lý Đế Bánh";
     if (path.includes("combos")) return "Quản Lý Combo";
+    if (path.includes("faqs")) return "Quản Lý FAQ";
     return "Admin";
   };
 
@@ -350,7 +358,7 @@ const LayoutAdmin = () => {
             background: "rgba(0,0,0,0.2)",
           }}
         >
-          <Link
+          {/* <Link
             to="/"
             style={{
               display: "flex",
@@ -373,7 +381,7 @@ const LayoutAdmin = () => {
           >
             <HomeOutlined style={{ fontSize: 18 }} />
             {!collapsed && <span style={{ fontWeight: 500 }}>Trang chủ</span>}
-          </Link>
+          </Link> */}
           <div
             style={{
               display: "flex",
@@ -543,6 +551,7 @@ function App() {
         { path: "vouchers", element: <VoucherAdmin /> },
         { path: "crusts", element: <CrustAdmin /> },
         { path: "combos", element: <ComboAdmin /> },
+        { path: "faqs", element: <FaqAdmin /> },
         { path: "catalogs", element: <CatalogAdmin /> },
 
         // { path: "dish", element: <TableDish /> },

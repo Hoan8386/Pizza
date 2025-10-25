@@ -222,6 +222,16 @@ const getAllFaqs = () =>{
     const URL_BACKEND =  "/api/faqs"
       return axios.get(URL_BACKEND);
 }
+
+const updateFaqAnswer = (id, answer) => {
+    const URL_BACKEND = `/api/faqs/${id}`;
+    return axios.put(URL_BACKEND, { answer });
+}
+
+const createFaq = (faqData) => {
+    const URL_BACKEND = "/api/faqs";
+    return axios.post(URL_BACKEND, faqData);
+}
  
  const searchProduct = (keyword) => {
   if (keyword && keyword.trim() !== "") {
@@ -381,6 +391,8 @@ export {
     getCombosApi ,
     addComboCartApi,
     getAllFaqs,
+    updateFaqAnswer,
+    createFaq,
     searchProduct,
     getAllOrder,
     getOrdersApi,
