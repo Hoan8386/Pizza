@@ -271,6 +271,18 @@ const getMonthlyRevenueApi = (params = {}) => {
     return axios.get('/api/revenue/monthly', { params });
 }
 
+const getTopProductsApi = (params = {}) => {
+    return axios.get('/api/revenue/top-products', { params });
+}
+
+const getTopCustomersApi = (params = {}) => {
+    return axios.get('/api/revenue/top-customers', { params });
+}
+
+const getCouponsApi = (params = {}) => {
+    return axios.get('/api/revenue/coupons', { params });
+}
+
 // Users (for CustomerAdmin & admin management)
 const getUsersApi = (params = {}) => axios.get('/api/users', { params });
 const createUserByAdminApi = (payload) => axios.post('/api/users', payload);
@@ -400,6 +412,9 @@ export {
     cancelOrderApi,
     getDashboardStatsApi,
     getMonthlyRevenueApi,
+    getTopProductsApi,
+    getTopCustomersApi,
+    getCouponsApi,
     getReviewProductApi,
     reviewProductApi,
     getAllBannerApi,
