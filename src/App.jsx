@@ -17,7 +17,7 @@ import { useState } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import LayoutApp from "./components/share/Layout.app";
 import { Spin, Layout, Menu } from "antd";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { InfoPage } from "./pages/Info.page";
 import { CartPage } from "./pages/Cart.page";
@@ -38,6 +38,7 @@ import FaqAdmin from "./pages/admin/FaqAdmin";
 import ProtectedRoute from "./share/ProtectedRoute";
 import NewsPage from "./pages/News.page";
 import "./styles/admin.css";
+import { logoutApi } from "./services/api.service.js";
 
 import {
   DashboardOutlined,
@@ -87,7 +88,8 @@ const LayoutClient = () => {
 };
 
 const LayoutAdmin = () => {
-  const { isAppLoading } = useContext(AuthContext);
+  const { isAppLoading, setUser, setCart, setIsAppLoading } =
+    useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -187,6 +189,22 @@ const LayoutAdmin = () => {
     if (path.includes("combos")) return "Quản Lý Combo";
     if (path.includes("faqs")) return "Quản Lý FAQ";
     return "Admin";
+  };
+
+  const logout = async () => {
+    setIsAppLoading(true);
+    const res = await logoutApi();
+    console.log(res);
+    if (res.data.success === true) {
+      toast.success(res.message);
+      setUser(null);
+      setCart(null);
+      localStorage.removeItem("token");
+      navigate("/");
+    } else {
+      toast.error("Đăng xuất thất bại");
+    }
+    setIsAppLoading(false);
   };
 
   if (isAppLoading) {
@@ -393,6 +411,7 @@ const LayoutAdmin = () => {
               justifyContent: collapsed ? "center" : "flex-start",
               transition: "all 0.3s ease",
             }}
+            onClick={logout}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "rgba(255,255,255,0.1)";
               e.currentTarget.style.transform = "translateX(5px)";
