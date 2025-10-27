@@ -130,7 +130,7 @@ export const CartPage = () => {
   const removeCoupon = () => {
     setCouponCode(null);
     setDiscount(0);
-    setTotalAfterDiscount("");
+    setTotalAfterDiscount(totalPrice);
     setCoupon("");
     toast.success("Đã hủy mã giảm giá");
   };
@@ -142,7 +142,7 @@ export const CartPage = () => {
       setIsLoading(true);
       const discountData = {
         discount: discount,
-        totalAfterDiscount: totalAfterDiscount,
+        totalAfterDiscount: totalAfterDiscount || totalPrice,
         totalPrice: totalPrice,
         discountCode: couponCode,
       };

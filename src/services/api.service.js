@@ -175,13 +175,13 @@ const createOrder = (shipping_address,coupon_code) =>{
     const URL_BACKEND ="/api/orders"
     const data ={
         shipping_address:shipping_address,
-    coupon_code:coupon_code
+    coupon_code:coupon_code,
     }
 return axios.post(URL_BACKEND,data);
 }
 
 const checkOutApi = (order_id,amount,method) =>{
-    const URL_BACKEND ="/api/orders"
+    const URL_BACKEND ="/api/payments"
     const data ={
         order_id:order_id,
     amount:amount,

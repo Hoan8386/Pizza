@@ -278,7 +278,7 @@ const OrderAdmin = () => {
                   gap: 16,
                 }}
               >
-                <div>
+                {/* <div>
                   <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
                     Tên người nhận
                   </div>
@@ -289,7 +289,7 @@ const OrderAdmin = () => {
                     Số điện thoại
                   </div>
                   <div>{detail?.shipping_phone || "-"}</div>
-                </div>
+                </div> */}
                 <div style={{ gridColumn: "1 / -1" }}>
                   <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
                     Địa chỉ
@@ -450,7 +450,11 @@ const OrderAdmin = () => {
                 >
                   <span>Mã giảm giá ({detail.coupon.code}):</span>
                   <span style={{ color: "green" }}>
-                    -{Number(detail.discount || 0).toLocaleString()}₫
+                    -
+                    {Number(
+                      detail.coupon.discount_amount || 0
+                    ).toLocaleString()}
+                    ₫
                   </span>
                 </div>
               )}

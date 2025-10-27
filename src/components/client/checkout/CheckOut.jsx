@@ -38,7 +38,7 @@ export const CheckOut = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Thanh toán
-  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
 
   // const { user } = useContext(AuthContext);
   // Lấy danh sách tỉnh
@@ -108,18 +108,25 @@ export const CheckOut = () => {
       }`;
 
       // Gọi tạo đơn hàng + thanh toán
+      const totalToPay = discountData
+        ? discountData.totalAfterDiscount
+        : orderRes.data.total_amount;
+      console.log("check totalToPay ", totalToPay);
       const orderRes = await createOrder(
         fullAddress,
-        discountData?.discountCode
+        discountData?.discountCode,
+        totalToPay
       );
 
+      console.log("check order Res", orderRes);
       if (orderRes?.data?.id) {
         const paymentRes = await checkOutApi(
           orderRes.data.id,
-          orderRes.data.total_amount,
+          totalToPay,
           paymentMethod
         );
 
+        console.log("check order Res", orderRes);
         if (!paymentRes?.data?.error) {
           toast.success("Thanh toán thành công");
           fetchCart();
@@ -257,7 +264,7 @@ export const CheckOut = () => {
               <div className="space-y-3">
                 <label
                   className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                    paymentMethod === "cod"
+                    paymentMethod === "cash"
                       ? "border-red-500 bg-red-50"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
@@ -265,8 +272,8 @@ export const CheckOut = () => {
                   <input
                     type="radio"
                     name="payment"
-                    value="cod"
-                    checked={paymentMethod === "cod"}
+                    value="cash"
+                    checked={paymentMethod === "cash"}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     className="w-5 h-5 text-red-600"
                   />

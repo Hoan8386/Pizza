@@ -56,6 +56,7 @@ import {
   CoffeeOutlined,
   QuestionCircleOutlined,
 } from "@ant-design/icons";
+import ChatbotWidget from "./components/Chatbot.jsx";
 
 const { Sider, Content } = Layout;
 
@@ -79,6 +80,7 @@ const LayoutClient = () => {
           <div className="w-[1170px]  mx-auto">
             <Header />
             <Outlet />
+            <ChatbotWidget />
             <Footer />
           </div>
         </>

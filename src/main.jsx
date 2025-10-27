@@ -11,6 +11,5 @@ createRoot(document.getElementById("root")).render(
     <ToastContainer />
 
     <App />
-    <ChatbotWidget />
   </AuthWrapper>
 );
