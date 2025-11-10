@@ -37,6 +37,7 @@ import ComboAdmin from "./pages/admin/ComboAdmin";
 import FaqAdmin from "./pages/admin/FaqAdmin";
 import ProtectedRoute from "./share/ProtectedRoute";
 import NewsPage from "./pages/News.page";
+import ThanksPage from "./pages/Thanks.page";
 import "./styles/admin.css";
 import { logoutApi } from "./services/api.service.js";
 
@@ -543,6 +544,7 @@ function App() {
         { path: "combos/:id", element: <DetailCombo /> },
         { path: "order", element: <OrderPage /> },
         { path: "news", element: <NewsPage /> },
+        { path: "thanks", element: <ThanksPage /> },
       ],
     },
 

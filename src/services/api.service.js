@@ -180,6 +180,13 @@ const createOrder = (shipping_address,coupon_code) =>{
 return axios.post(URL_BACKEND,data);
 }
 
+// Initiate VNPAY via API: returns { url }
+const vnpayInitiate = (order_id, amount, description) => {
+    const URL_BACKEND = `/api/vnpay/initiate`;
+    const data = { order_id, amount, description };
+    return axios.post(URL_BACKEND, data);
+}
+
 const checkOutApi = (order_id,amount,method) =>{
     const URL_BACKEND ="/api/payments"
     const data ={
@@ -431,6 +438,7 @@ export {
     updateVoucherApi,
     deleteVoucherApi,
     getAllCombosApi,
+    vnpayInitiate,
     createComboApi,
     updateComboApi,
     deleteComboApi

@@ -10,6 +10,8 @@ import {
   PhoneOutlined,
   MailOutlined,
   DollarOutlined,
+  CreditCardOutlined,
+  WalletOutlined,
 } from "@ant-design/icons";
 import { Empty, Spin, Tag, Pagination } from "antd";
 import dayjs from "dayjs";
@@ -49,6 +51,34 @@ const StatusConfig = {
     color: "error",
     bgColor: "bg-red-50",
     borderColor: "border-red-300",
+  },
+};
+
+const PaymentMethodConfig = {
+  cash: {
+    label: "Tiền mặt",
+    icon: <WalletOutlined />,
+    color: "green",
+  },
+  credit_card: {
+    label: "Thẻ tín dụng",
+    icon: <CreditCardOutlined />,
+    color: "blue",
+  },
+  bank_transfer: {
+    label: "Chuyển khoản",
+    icon: <CreditCardOutlined />,
+    color: "cyan",
+  },
+  paypal: {
+    label: "PayPal",
+    icon: <CreditCardOutlined />,
+    color: "purple",
+  },
+  vnpay: {
+    label: "VNPay",
+    icon: <CreditCardOutlined />,
+    color: "red",
   },
 };
 
@@ -147,7 +177,7 @@ export const OrderPage = () => {
                       <div
                         className={`${statusConfig.bgColor} px-6 py-5 border-b`}
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                           {/* Order ID */}
                           <div>
                             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
@@ -183,6 +213,36 @@ export const OrderPage = () => {
                             >
                               {statusConfig.label}
                             </Tag>
+                          </div>
+
+                          {/* Payment Method */}
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                              Thanh toán
+                            </p>
+                            {order.payments && order.payments.length > 0 ? (
+                              <Tag
+                                icon={
+                                  PaymentMethodConfig[order.payments[0].method]
+                                    ?.icon
+                                }
+                                color={
+                                  PaymentMethodConfig[order.payments[0].method]
+                                    ?.color
+                                }
+                                className="px-3 py-1 text-sm font-semibold"
+                              >
+                                {PaymentMethodConfig[order.payments[0].method]
+                                  ?.label || order.payments[0].method}
+                              </Tag>
+                            ) : (
+                              <Tag
+                                color="default"
+                                className="px-3 py-1 text-sm"
+                              >
+                                Chưa có phương thức
+                              </Tag>
+                            )}
                           </div>
 
                           {/* Total */}

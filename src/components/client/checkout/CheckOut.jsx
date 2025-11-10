@@ -6,6 +6,7 @@ import {
   checkOutApi,
   createOrder,
   getCart,
+  vnpayInitiate,
 } from "../../../services/api.service";
 import { toast } from "react-toastify";
 import { Button } from "antd";
@@ -38,7 +39,7 @@ export const CheckOut = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Thanh toán
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentMethod, setPaymentMethod] = useState("cash"); // default payment method
 
   // const { user } = useContext(AuthContext);
   // Lấy danh sách tỉnh
@@ -98,6 +99,7 @@ export const CheckOut = () => {
         !selectedWard
       ) {
         toast.warning("Vui lòng nhập đầy đủ địa chỉ");
+        setIsLoading(false);
         return;
       }
 
@@ -107,27 +109,64 @@ export const CheckOut = () => {
         provinces.find((p) => p.code === +selectedProvince)?.name || ""
       }`;
 
-      // Gọi tạo đơn hàng + thanh toán
-      const totalToPay = discountData
-        ? discountData.totalAfterDiscount
-        : orderRes.data.total_amount;
-      console.log("check totalToPay ", totalToPay);
+      // Gọi tạo đơn hàng
+      const totalToPay = discountData ? discountData.totalAfterDiscount : 0; // will be updated from order response
+
       const orderRes = await createOrder(
         fullAddress,
-        discountData?.discountCode,
-        totalToPay
+        discountData?.discountCode
       );
 
       console.log("check order Res", orderRes);
-      if (orderRes?.data?.id) {
+
+      // Normalize response (axios.customize may unwrap data)
+      const order = orderRes?.data?.id ? orderRes.data : orderRes;
+      const orderId = order?.id;
+
+      if (!orderId) {
+        toast.error("Tạo đơn hàng thất bại");
+        setIsLoading(false);
+        return;
+      }
+
+      // Get final amount from discount data or order response
+      const finalAmount =
+        discountData?.totalAfterDiscount || order?.total_amount || totalToPay;
+
+      // Handle VNPay payment method
+      if (paymentMethod === "vnpay") {
+        try {
+          const vnpayRes = await vnpayInitiate(
+            orderId,
+            finalAmount,
+            `Thanh toan don ${orderId}`
+          );
+          console.log("VNPay response:", vnpayRes);
+
+          // Get URL from response (handle both wrapped and unwrapped)
+          const redirectUrl = vnpayRes?.url || vnpayRes?.data?.url;
+
+          if (redirectUrl) {
+            // Navigate to VNPAY
+            window.location.href = redirectUrl;
+            return; // Stop here as browser will navigate away
+          } else {
+            toast.error("Không thể khởi tạo thanh toán VNPay");
+          }
+        } catch (err) {
+          console.error("VNPay error:", err);
+          toast.error("Lỗi khi khởi tạo VNPay");
+        }
+      } else {
+        // Handle other payment methods
         const paymentRes = await checkOutApi(
-          orderRes.data.id,
-          totalToPay,
+          orderId,
+          finalAmount,
           paymentMethod
         );
 
-        console.log("check order Res", orderRes);
-        if (!paymentRes?.data?.error) {
+        console.log("Payment response:", paymentRes);
+        if (!paymentRes?.error && !paymentRes?.data?.error) {
           toast.success("Thanh toán thành công");
           fetchCart();
           setTimeout(() => {
@@ -136,8 +175,6 @@ export const CheckOut = () => {
         } else {
           toast.error("Thanh toán thất bại");
         }
-      } else {
-        toast.error("Thanh toán thất bại");
       }
     } catch (error) {
       console.error("Error placing order:", error);
@@ -335,7 +372,32 @@ export const CheckOut = () => {
                       Ví điện tử
                     </div>
                     <div className="text-sm text-gray-500">
-                      Momo, ZaloPay, VNPay...
+                      Momo, ZaloPay...
+                    </div>
+                  </div>
+                </label>
+
+                {/* VNPay payment option */}
+                <label
+                  className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                    paymentMethod === "vnpay"
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="vnpay"
+                    checked={paymentMethod === "vnpay"}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-5 h-5 text-red-600"
+                  />
+                  <CreditCardOutlined className="text-2xl text-red-600" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-800">VNPay</div>
+                    <div className="text-sm text-gray-500">
+                      Thanh toán qua VNPay (thẻ/ngân hàng)
                     </div>
                   </div>
                 </label>
