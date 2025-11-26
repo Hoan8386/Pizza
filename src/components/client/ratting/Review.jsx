@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Modal, Rate, Spin, Input, Button } from "antd";
+import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
 import {
   getReviewProductApi,
   reviewProductApi,
@@ -10,10 +11,12 @@ import {
   UserOutlined,
   StarFilled,
   ClockCircleOutlined,
+  LoginOutlined, // Thêm icon đăng nhập
 } from "@ant-design/icons";
 
 export const ModelReviewProduct = ({ product, onClose }) => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate(); // 2. Khởi tạo navigate
 
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,7 +47,9 @@ export const ModelReviewProduct = ({ product, onClose }) => {
   }, [product]);
 
   const handleSubmit = async () => {
-    if (user.id != null) {
+    // Không cần check user.id ở đây nữa vì UI đã chặn rồi,
+    // nhưng giữ lại để bảo mật thêm cũng tốt.
+    if (user?.id) {
       if (!rating || !comment.trim()) {
         toast.warning("Vui lòng nhập đầy đủ đánh giá!");
         return;
@@ -69,6 +74,12 @@ export const ModelReviewProduct = ({ product, onClose }) => {
     } else {
       toast.error("Bạn phải đăng nhập để đánh giá");
     }
+  };
+
+  // Hàm xử lý chuyển trang đăng nhập
+  const handleLoginRedirect = () => {
+    onClose(); // Đóng modal hiện tại
+    navigate("/login"); // Chuyển hướng sang trang login (thay đổi đường dẫn nếu cần)
   };
 
   // Calculate average rating
@@ -127,61 +138,90 @@ export const ModelReviewProduct = ({ product, onClose }) => {
           </div>
         </div>
 
-        {/* Write Review Section */}
-        <div className="bg-gray-50 rounded-2xl p-5 mb-5">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <UserOutlined className="text-red-600 text-lg" />
-            </div>
-            <h3 className="text-lg font-bold text-yellow-600">
-              Viết đánh giá của bạn
-            </h3>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-yellow-600 mb-2">
-                Đánh giá của bạn
-              </label>
-              <Rate
-                value={rating}
-                onChange={setRating}
-                className="text-xl"
-                style={{ color: "#fadb14" }}
-              />
+        {/* 3. Logic hiển thị Form đánh giá hoặc Nút đăng nhập */}
+        {user?.id ? (
+          /* TRƯỜNG HỢP ĐÃ ĐĂNG NHẬP: Hiển thị form đánh giá */
+          <div className="bg-gray-50 rounded-2xl p-5 mb-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <UserOutlined className="text-red-600 text-lg" />
+              </div>
+              <h3 className="text-lg font-bold text-yellow-600">
+                Viết đánh giá của bạn
+              </h3>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-yellow-600 mb-2">
-                Nhận xét chi tiết
-              </label>
-              <Input.TextArea
-                rows={3}
-                placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="rounded-xl"
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-yellow-600 mb-2">
+                  Đánh giá của bạn
+                </label>
+                <Rate
+                  value={rating}
+                  onChange={setRating}
+                  className="text-xl"
+                  style={{ color: "#fadb14" }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-yellow-600 mb-2">
+                  Nhận xét chi tiết
+                </label>
+                <Input.TextArea
+                  rows={3}
+                  placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="rounded-xl"
+                  style={{
+                    resize: "none",
+                  }}
+                />
+              </div>
+
+              <Button
+                type="primary"
+                size="large"
+                loading={submitting}
+                onClick={handleSubmit}
+                className="w-full h-11 rounded-xl font-semibold"
                 style={{
-                  resize: "none",
+                  backgroundColor: "#b91c1c",
+                  borderColor: "#b91c1c",
                 }}
-              />
+              >
+                {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+              </Button>
             </div>
-
+          </div>
+        ) : (
+          /* TRƯỜNG HỢP CHƯA ĐĂNG NHẬP: Hiển thị nút yêu cầu đăng nhập */
+          <div className="bg-gray-50 rounded-2xl p-8 mb-5 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200">
+            <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
+              <LoginOutlined className="text-2xl text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-700 mb-2">
+              Bạn cần đăng nhập để đánh giá
+            </h3>
+            <p className="text-gray-500 mb-4 text-sm max-w-xs">
+              Vui lòng đăng nhập tài khoản để chia sẻ trải nghiệm của bạn về sản
+              phẩm này.
+            </p>
             <Button
               type="primary"
               size="large"
-              loading={submitting}
-              onClick={handleSubmit}
-              className="w-full h-11 rounded-xl font-semibold"
+              onClick={handleLoginRedirect}
+              className="h-10 px-8 rounded-full font-medium shadow-md hover:shadow-lg transition-all"
               style={{
                 backgroundColor: "#b91c1c",
                 borderColor: "#b91c1c",
               }}
             >
-              {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+              Đăng nhập ngay
             </Button>
           </div>
-        </div>
+        )}
 
         {/* Reviews List */}
         <div>

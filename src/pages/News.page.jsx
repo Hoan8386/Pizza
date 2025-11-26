@@ -8,11 +8,12 @@ import {
   ClockCircleOutlined,
   ArrowRightOutlined,
 } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const NewsPage = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     fetchNews();
   }, []);
@@ -110,10 +111,13 @@ const NewsPage = () => {
                       </div>
                     </div>
 
-                    <button className="w-fit bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-4 px-8 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl flex items-center gap-2 group">
-                      Đọc Ngay
+                    {/* <button className="w-fit bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-4 px-8 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl flex items-center gap-2 group" 
+                    onClick={(e)=>{
+                      navigate("/admin");
+                    }}>
+                      Xem ngay
                       <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>
@@ -182,10 +186,10 @@ const NewsPage = () => {
                       </p>
 
                       {/* Button */}
-                      <button className="w-full bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 text-red-500 font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group">
+                      {/* <button className="w-full bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 text-red-500 font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group">
                         Xem Chi Tiết
                         <ArrowRightOutlined className="text-sm group-hover:translate-x-1 transition-transform" />
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 ))}
