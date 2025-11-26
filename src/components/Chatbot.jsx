@@ -1,15 +1,21 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   SendOutlined,
   UserOutlined,
   LoadingOutlined,
   CloseOutlined,
   StarFilled,
+  ShoppingCartOutlined, // Icon giỏ hàng
 } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import PizzaHutLogo from "../assets/PizzaHut.jpg";
+import { toast } from "react-toastify";
+import PizzaHutLogo from "../assets/PizzaHut.jpg"; // Đảm bảo đường dẫn ảnh này đúng với project của bạn
+
+// --- SỬA ĐƯỜNG DẪN IMPORT CHO ĐÚNG CẤU TRÚC FILE CỦA BẠN ---
+import { AuthContext } from "./context/auth.context";
+import { apiAddCart, getCart } from "../services/api.service";
 
 const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +24,14 @@ const ChatbotWidget = () => {
   const [loading, setLoading] = useState(false);
   const [threadId, setThreadId] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  
+  // State mới để theo dõi sản phẩm nào đang được thêm vào giỏ (loading riêng lẻ)
+  const [addingToCartId, setAddingToCartId] = useState(null);
+
   const messagesEndRef = useRef(null);
+
+  // --- Lấy user và hàm cập nhật giỏ hàng từ Context ---
+  const { user, setCart } = useContext(AuthContext);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -34,12 +47,49 @@ const ChatbotWidget = () => {
     }
   }, [isOpen]);
 
+  // --- Hàm xử lý thêm vào giỏ hàng ---
+  const handleAddToCart = async (product) => {
+    // 1. Kiểm tra đăng nhập
+    if (!user || !user.id) {
+      toast.error("Vui lòng đăng nhập để mua hàng!");
+      return;
+    }
+
+    // Bắt đầu loading cho sản phẩm này
+    setAddingToCartId(product.id);
+
+    try {
+      // 2. Gọi API thêm vào giỏ (product.id trong response chatbot chính là variant id)
+      // Số lượng mặc định là 1
+      await apiAddCart(product.id, 1);
+
+      // 3. Cập nhật lại giỏ hàng toàn cục (Context)
+      const res = await getCart();
+      if (res.data) {
+        setCart({
+          id: res.data.cart.id,
+          user_id: res.data.cart.user_id,
+          totalItems: res.data.items.length,
+          totalPrice: res.data.total,
+          items: res.data.items,
+        });
+      }
+
+      toast.success(`Đã thêm "${product.product_name}" vào giỏ!`);
+    } catch (error) {
+      console.error("Lỗi thêm giỏ hàng:", error);
+      toast.error("Có lỗi xảy ra khi thêm vào giỏ hàng.");
+    } finally {
+      // Kết thúc loading dù thành công hay thất bại
+      setAddingToCartId(null);
+    }
+  };
+
   const sendMessage = async () => {
     if (!inputValue.trim()) return;
 
     const accessToken = localStorage.getItem("access_token");
 
-    // Kiểm tra nếu chưa đăng nhập
     if (!accessToken) {
       const loginMessage = {
         id: Date.now() + 1,
@@ -414,7 +464,7 @@ const ChatbotWidget = () => {
                       <div
                         className={`flex flex-col ${
                           msg.type === "user" ? "items-end" : "items-start"
-                        } max-w-[75%]`}
+                        } max-w-[85%]`}
                       >
                         <div
                           className={`rounded-2xl px-5 py-3 shadow-md ${
@@ -453,32 +503,44 @@ const ChatbotWidget = () => {
                                         className="w-20 h-20 object-cover rounded-lg shadow-md"
                                       />
                                     )}
-                                    <div className="flex-1">
-                                      <h5 className="font-bold text-gray-800 mb-1 text-sm">
-                                        {product.product_name}
-                                      </h5>
-                                      <p className="text-xs text-gray-600 mb-2">
-                                        {product.size_name} •{" "}
-                                        {product.crust_name}
-                                      </p>
-                                      <div className="flex items-center justify-between">
-                                        <span className="font-bold text-red-600 text-base">
+                                    <div className="flex-1 flex flex-col justify-between">
+                                      <div>
+                                        <h5 className="font-bold text-gray-800 mb-1 text-sm line-clamp-1">
+                                          {product.product_name}
+                                        </h5>
+                                        <p className="text-xs text-gray-600 mb-1">
+                                          {product.size_name} •{" "}
+                                          {product.crust_name}
+                                        </p>
+                                      </div>
+
+                                      <div className="flex flex-col gap-2 mt-2">
+                                        <span className="font-bold text-red-600 text-sm">
                                           {product.price.toLocaleString(
                                             "vi-VN"
                                           )}
                                           ₫
                                         </span>
-                                        {/* <span
-                                          className={`text-xs px-3 py-1 rounded-full font-semibold ${
-                                            product.stock > 0
-                                              ? "bg-green-100 text-green-700"
-                                              : "bg-red-100 text-red-700"
+                                        
+                                        {/* Nút thêm vào giỏ hàng với hiệu ứng loading riêng lẻ */}
+                                        <button
+                                          onClick={() =>
+                                            handleAddToCart(product)
+                                          }
+                                          disabled={addingToCartId === product.id} // Disable khi đang load
+                                          className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all shadow-sm w-full ${
+                                            addingToCartId === product.id 
+                                              ? "bg-red-400 cursor-not-allowed text-white" 
+                                              : "bg-red-600 hover:bg-red-700 active:scale-95 text-white"
                                           }`}
                                         >
-                                          {product.stock > 0
-                                            ? `Còn ${product.stock}`
-                                            : "Hết hàng"}
-                                        </span> */}
+                                          {addingToCartId === product.id ? (
+                                            <LoadingOutlined />
+                                          ) : (
+                                            <ShoppingCartOutlined />
+                                          )} 
+                                          {addingToCartId === product.id ? " Đang thêm..." : " Thêm vào giỏ"}
+                                        </button>
                                       </div>
                                     </div>
                                   </div>
