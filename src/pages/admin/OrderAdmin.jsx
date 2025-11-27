@@ -450,11 +450,17 @@ const OrderAdmin = () => {
                 >
                   <span>Mã giảm giá ({detail.coupon.code}):</span>
                   <span style={{ color: "green" }}>
-                    -
-                    {Number(
-                      detail.coupon.discount_amount || 0
-                    ).toLocaleString()}
-                    ₫
+                    {detail.coupon.discount_amount === null &&
+                    detail.coupon.discount_percentage ? (
+                      <>-{detail.coupon.discount_percentage}%</>
+                    ) : detail.coupon.discount_percentage === null &&
+                      detail.coupon.discount_amount ? (
+                      <>
+                        -
+                        {Number(detail.coupon.discount_amount).toLocaleString()}
+                        ₫
+                      </>
+                    ) : null}
                   </span>
                 </div>
               )}

@@ -8,13 +8,11 @@ import {
   createProductApi,
   updateProductApi,
   deleteProductApi,
+  createProductVariantApi,
+  updateProductVariantApi,
+  deleteProductVariantApi,
 } from "../../services/api.service";
-import {
-  ShoppingOutlined,
-  AppstoreOutlined,
-  BarsOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -29,11 +27,9 @@ import {
   Space,
   Table,
   Tag,
-  Typography,
   Upload,
   Tabs,
 } from "antd";
-import { Link } from "react-router-dom";
 import { useToast } from "../../hooks/useToast";
 
 const ProductAdmin = () => {
@@ -46,12 +42,25 @@ const ProductAdmin = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVariantSubmitting, setIsVariantSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [deletingVariantId, setDeletingVariantId] = useState(null);
+
   const [editingProduct, setEditingProduct] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFileName, setImageFileName] = useState(null);
   const [form] = Form.useForm();
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
   const { success, error } = useToast();
+
+  // Variant modal state
+  const [variantModal, setVariantModal] = useState({
+    open: false,
+    mode: null,
+    variant: null,
+    productId: null,
+  });
+  const [variantForm] = Form.useForm();
 
   const fetchMeta = async () => {
     try {
@@ -84,6 +93,7 @@ const ProductAdmin = () => {
   useEffect(() => {
     fetchMeta();
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openCreate = () => {
@@ -117,11 +127,98 @@ const ProductAdmin = () => {
 
   const handleDelete = async (id) => {
     try {
+      setDeletingId(id);
       await deleteProductApi(id);
       success("Đã xoá sản phẩm");
-      fetchProducts(keyword);
+      await fetchProducts(keyword);
     } catch {
       error("Xoá sản phẩm thất bại");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const openVariantModal = (mode, productId, variant = null) => {
+    setVariantModal({ open: true, mode, variant, productId });
+    if (mode === "edit" && variant) {
+      variantForm.setFieldsValue({
+        size_id: variant.size?.id || variant.size_id || null,
+        crust_id: variant.crust?.id || variant.crust_id || null,
+        price: variant.price,
+        stock: variant.stock,
+      });
+    } else {
+      variantForm.setFieldsValue({
+        size_id: null,
+        crust_id: null,
+        price: 0,
+        stock: 0,
+      });
+    }
+  };
+
+  const handleVariantSubmit = async () => {
+    try {
+      setIsVariantSubmitting(true);
+      const values = await variantForm.validateFields();
+      const payload = {
+        size_id: values.size_id || null,
+        crust_id: values.crust_id || null,
+        price: Number(values.price),
+        stock: Number(values.stock || 0),
+      };
+
+      if (variantModal.mode === "create") {
+        await createProductVariantApi({
+          ...payload,
+          product_id: variantModal.productId,
+        });
+        success("Thêm biến thể thành công");
+      } else if (variantModal.mode === "edit") {
+        await updateProductVariantApi(variantModal.variant.id, payload);
+        success("Cập nhật biến thể thành công");
+      }
+
+      setVariantModal({
+        open: false,
+        mode: null,
+        variant: null,
+        productId: null,
+      });
+
+      // Đóng modal cha sau khi thêm/sửa biến thể xong
+      setIsModalOpen(false);
+
+      variantForm.resetFields();
+      await fetchProducts(keyword);
+    } catch (err) {
+      if (err && err.errorFields) return;
+      error("Lưu biến thể thất bại");
+    } finally {
+      setIsVariantSubmitting(false);
+    }
+  };
+
+  const handleDeleteVariant = async (variantId) => {
+    try {
+      setDeletingVariantId(variantId);
+      await deleteProductVariantApi(variantId);
+      success("Đã xoá biến thể");
+
+      // ĐÓNG TẤT CẢ MODAL SAU KHI XÓA BIẾN THỂ
+      setIsModalOpen(false);
+      setVariantModal({
+        open: false,
+        mode: null,
+        variant: null,
+        productId: null,
+      });
+
+      await fetchProducts(keyword);
+    } catch {
+      error("Xoá biến thể thất bại");
+    } finally {
+      setDeletingVariantId(null);
     }
   };
 
@@ -131,15 +228,12 @@ const ProductAdmin = () => {
       setIsSubmitting(true);
 
       if (editingProduct) {
-        // Allow updating variants as well: backend update currently only updates base fields,
-        // so we update base and inform user variants will be applied when supported.
         const basePayload = {
           name: values.name,
           description: values.description,
           image_url: values.image_url,
           category_id: values.category_id || null,
         };
-        // Chỉ truyền fileName nếu có ảnh mới được chọn
         if (imageFileName) {
           basePayload.fileName = imageFileName;
           basePayload.image_url = imageFileName;
@@ -147,7 +241,6 @@ const ProductAdmin = () => {
         await updateProductApi(editingProduct.id, basePayload);
         success("Cập nhật sản phẩm thành công");
       } else {
-        // Create with variants
         const variants = (values.variants || [])
           .filter((v) => v && v.price !== undefined)
           .map((v) => ({
@@ -164,7 +257,6 @@ const ProductAdmin = () => {
           category_id: values.category_id || null,
           variants,
         };
-        console.log("check payload ", payload);
         await createProductApi(payload);
         success("Tạo sản phẩm thành công");
       }
@@ -174,9 +266,9 @@ const ProductAdmin = () => {
       form.resetFields();
       setImagePreview(null);
       setImageFileName(null);
-      fetchProducts(keyword);
+      await fetchProducts(keyword);
     } catch (err) {
-      if (err && err.errorFields) return; // antd validation
+      if (err && err.errorFields) return;
       error("Lưu sản phẩm thất bại");
     } finally {
       setIsSubmitting(false);
@@ -196,7 +288,6 @@ const ProductAdmin = () => {
     [crusts]
   );
 
-  // Nhóm sản phẩm theo category
   const productsByCategory = useMemo(() => {
     const grouped = {};
     (products || []).forEach((product) => {
@@ -310,7 +401,7 @@ const ProductAdmin = () => {
             cancelText="Huỷ"
             onConfirm={() => handleDelete(record.id)}
           >
-            <Button size="small" danger>
+            <Button size="small" danger loading={deletingId === record.id}>
               Xoá
             </Button>
           </Popconfirm>
@@ -328,13 +419,18 @@ const ProductAdmin = () => {
               placeholder="Tìm theo tên/mô tả"
               allowClear
               value={keyword}
+              loading={loading}
               onChange={(e) => setKeyword(e.target.value)}
               onSearch={(v) => fetchProducts(v)}
               className="w-full"
             />
           </Col>
           <Col xs={12} sm={6} md={3}>
-            <Button onClick={() => fetchProducts(keyword)} className="w-full">
+            <Button
+              onClick={() => fetchProducts(keyword)}
+              className="w-full"
+              loading={loading}
+            >
               Tải lại
             </Button>
           </Col>
@@ -380,6 +476,7 @@ const ProductAdmin = () => {
               <Table
                 size="middle"
                 rowKey={(r) => r.id}
+                loading={loading}
                 columns={columns}
                 dataSource={category.products}
                 scroll={{ x: 800 }}
@@ -530,7 +627,101 @@ const ProductAdmin = () => {
             />
           </Form.Item>
 
-          {
+          {editingProduct && editingProduct.product_variants?.length > 0 && (
+            <div style={{ marginTop: 24, marginBottom: 24 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 16,
+                  paddingBottom: 12,
+                  borderBottom: "2px solid #f0f0f0",
+                }}
+              >
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: "#333",
+                  }}
+                >
+                  📦 Biến thể hiện tại
+                </h3>
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {editingProduct.product_variants.map((variant) => (
+                  <Card
+                    key={variant.id}
+                    style={{
+                      borderRadius: "8px",
+                      border: "1px solid #e8e8e8",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                    }}
+                    bodyStyle={{ padding: 12 }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div>
+                        <p style={{ margin: "0 0 8px 0", fontWeight: 500 }}>
+                          Size: {variant.size?.name || "-"} | Đế:{" "}
+                          {variant.crust?.name || "-"}
+                        </p>
+                        <p style={{ margin: "0 0 4px 0", color: "#666" }}>
+                          Giá: {Number(variant.price).toLocaleString()}₫
+                        </p>
+                        <p style={{ margin: 0, color: "#666" }}>
+                          Kho: {variant.stock} cái
+                        </p>
+                      </div>
+                      <Space>
+                        <Button
+                          size="small"
+                          onClick={() =>
+                            openVariantModal("edit", editingProduct.id, variant)
+                          }
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xoá biến thể"
+                          description="Bạn chắc muốn xoá?"
+                          okText="Xoá"
+                          cancelText="Huỷ"
+                          onConfirm={() => handleDeleteVariant(variant.id)}
+                        >
+                          <Button
+                            size="small"
+                            danger
+                            loading={deletingVariantId === variant.id}
+                          >
+                            Xoá
+                          </Button>
+                        </Popconfirm>
+                      </Space>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              <Button
+                type="dashed"
+                onClick={() => openVariantModal("create", editingProduct.id)}
+                style={{ width: "100%", marginTop: 12 }}
+              >
+                + Thêm biến thể mới
+              </Button>
+            </div>
+          )}
+
+          {!editingProduct && (
             <Form.List name="variants">
               {(fields, { add, remove }) => (
                 <div style={{ marginTop: 24 }}>
@@ -718,7 +909,50 @@ const ProductAdmin = () => {
                 </div>
               )}
             </Form.List>
-          }
+          )}
+        </Form>
+      </Modal>
+
+      <Modal
+        title={
+          variantModal.mode === "create" ? "Thêm biến thể" : "Sửa biến thể"
+        }
+        open={variantModal.open}
+        confirmLoading={isVariantSubmitting}
+        onCancel={() => {
+          setVariantModal({
+            open: false,
+            mode: null,
+            variant: null,
+            productId: null,
+          });
+          variantForm.resetFields();
+        }}
+        onOk={handleVariantSubmit}
+        okText={variantModal.mode === "create" ? "Tạo mới" : "Lưu"}
+        cancelText="Huỷ"
+      >
+        <Form form={variantForm} layout="vertical">
+          <Form.Item label="Size (tùy chọn)" name="size_id">
+            <Select allowClear options={sizeOptions} placeholder="Chọn size" />
+          </Form.Item>
+          <Form.Item label="Đế (tùy chọn)" name="crust_id">
+            <Select allowClear options={crustOptions} placeholder="Chọn đế" />
+          </Form.Item>
+          <Form.Item
+            label="Giá (₫)"
+            name="price"
+            rules={[{ required: true, message: "Vui lòng nhập giá" }]}
+          >
+            <Input type="number" min={0} placeholder="0" />
+          </Form.Item>
+          <Form.Item
+            label="Kho (số lượng)"
+            name="stock"
+            rules={[{ required: true, message: "Vui lòng nhập số lượng" }]}
+          >
+            <Input type="number" min={0} placeholder="0" />
+          </Form.Item>
         </Form>
       </Modal>
     </div>

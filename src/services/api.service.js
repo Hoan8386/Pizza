@@ -373,6 +373,22 @@ const deleteComboApi = (id) => {
     return axios.delete(`/api/combos/${id}`);
 };
 
+// Product Variants CRUD
+const createProductVariantApi = (payload) => {
+    const URL_BACKEND = "/api/product-variants";
+    return axios.post(URL_BACKEND, payload);
+};
+
+const updateProductVariantApi = (id, payload) => {
+    const URL_BACKEND = `/api/product-variants/${id}`;
+    return axios.put(URL_BACKEND, payload);
+};
+
+const deleteProductVariantApi = (id) => {
+    const URL_BACKEND = `/api/product-variants/${id}`;
+    return axios.delete(URL_BACKEND);
+};
+
 export {
     getAllProducts,
     createProductApi,
@@ -441,5 +457,8 @@ export {
     vnpayInitiate,
     createComboApi,
     updateComboApi,
-    deleteComboApi
+    deleteComboApi,
+    createProductVariantApi,
+    updateProductVariantApi,
+    deleteProductVariantApi
 };

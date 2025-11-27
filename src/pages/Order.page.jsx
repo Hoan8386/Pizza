@@ -408,12 +408,13 @@ export const OrderPage = () => {
                                       {order.coupon.code}
                                     </span>
                                   </p>
-                                  {order.coupon.discount_percentage && (
+                                  {order.coupon.discount_amount === null &&
+                                  order.coupon.discount_percentage ? (
                                     <p className="text-sm font-semibold text-gray-700">
                                       Giảm: {order.coupon.discount_percentage}%
                                     </p>
-                                  )}
-                                  {order.coupon.discount_amount && (
+                                  ) : order.coupon.discount_percentage ===
+                                      null && order.coupon.discount_amount ? (
                                     <p className="text-sm font-semibold text-gray-700">
                                       Giảm: -
                                       {Number(
@@ -421,7 +422,7 @@ export const OrderPage = () => {
                                       ).toLocaleString("vi-VN")}{" "}
                                       ₫
                                     </p>
-                                  )}
+                                  ) : null}
                                 </div>
                               )}
                             <div className="text-right">
